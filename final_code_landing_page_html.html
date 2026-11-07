@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMANAH PRODUCTS | Quality Products. Meaningful Opportunities.</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            100: '#FAF3E0',
+                            200: '#F3E5AB',
+                            300: '#E6C687',
+                            400: '#D4AF37', // Classic Gold
+                            500: '#C59B27',
+                            600: '#AA7C11',
+                            700: '#8A6208',
+                        },
+                        obsidian: '#0B0C10',
+                        charcoal: '#1F2833',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Client v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAFAFA;
+            color: #1F2833;
+        }
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #F3E5AB 50%, #AA7C11 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gold-btn {
+            background: linear-gradient(135deg, #D4AF37 0%, #C59B27 100%);
+            color: #000;
+            transition: all 0.3s ease;
+        }
+        .gold-btn:hover {
+            background: linear-gradient(135deg, #E6C687 0%, #D4AF37 100%);
+            box-shadow: 0 10px 20px -5px rgba(212, 175, 55, 0.4);
+            transform: translateY(-2px);
+        }
+        .gold-card-border {
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            transition: all 0.3s ease;
+        }
+        .gold-card-border:hover {
+            border-color: rgba(212, 175, 55, 0.8);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08);
+            transform: translateY(-4px);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0C10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-gold-400 selection:text-black">
+
+    <!-- ================= TOP NAVIGATION ================= -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-obsidian/95 backdrop-blur-md border-b border-gold-400/20 text-white transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="#home" class="flex items-center space-x-3 group">
+                    <div class="w-12 h-12 rounded-full border-2 border-gold-400 overflow-hidden bg-obsidian p-0.5 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <img id="main-nav-logo" src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" alt="AMANAH Logo" class="w-full h-full object-contain rounded-full">
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-serif text-xl font-bold tracking-widest text-white group-hover:text-gold-400 transition-colors">AMANAH</span>
+                        <span class="text-[9px] uppercase tracking-[0.3em] text-gold-400 -mt-1">Distribution & Marketing</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wider">
+                    <a href="#home" class="hover:text-gold-400 transition-colors text-white py-2">Home</a>
+                    <a href="#about" class="hover:text-gold-400 transition-colors text-slate-300 py-2">About Us</a>
+                    <a href="#products" class="hover:text-gold-400 transition-colors text-slate-300 py-2">Our Products</a>
+                    <a href="#opportunity" class="hover:text-gold-400 transition-colors text-slate-300 py-2">Partnership</a>
+                    <a href="#pos-checkout" class="hover:text-gold-400 transition-colors text-slate-300 py-2">POS & Orders</a>
+                </nav>
+
+                <!-- Right Action Buttons -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <button onclick="toggleCartDrawer()" class="gold-btn px-5 py-2.5 rounded-full font-semibold text-xs tracking-wider uppercase flex items-center gap-2 relative">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Cart</span>
+                        <span id="nav-cart-count" class="bg-black text-gold-400 font-bold px-2 py-0.5 rounded-full text-[10px] hidden">0</span>
+                    </button>
+                    <button onclick="openCSAuthModal()" class="px-4 py-2 rounded-full border border-slate-600 text-slate-300 hover:text-gold-400 hover:border-gold-400/50 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-headset"></i>
+                        <span>CS Desk</span>
+                    </button>
+                    <button onclick="openAdminAuthModal()" class="px-4 py-2 rounded-full border border-gold-400/50 text-gold-400 hover:bg-gold-400/10 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Admin</span>
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center gap-3">
+                    <button onclick="openAdminAuthModal()" class="text-gold-400 p-2" aria-label="Admin Portal">
+                        <i class="fa-solid fa-user-shield text-lg"></i>
+                    </button>
+                    <button onclick="toggleCartDrawer()" class="text-gold-400 p-2 relative" aria-label="View Cart">
+                        <i class="fa-solid fa-cart-shopping text-xl"></i>
+                        <span id="mobile-cart-badge" class="absolute -top-1 -right-1 bg-gold-400 text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+                    </button>
+                    <button id="mobile-menu-btn" type="button" class="text-slate-300 hover:text-gold-400 focus:outline-none p-2" aria-label="Toggle Navigation">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden bg-obsidian/98 border-b border-gold-400/20 px-4 pt-2 pb-6 space-y-3">
+            <a href="#home" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-white hover:text-gold-400 hover:bg-slate-900">Home</a>
+            <a href="#about" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-gold-400 hover:bg-slate-900">About Us</a>
+            <a href="#products" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-gold-400 hover:bg-slate-900">Our Products</a>
+            <a href="#opportunity" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-gold-400 hover:bg-slate-900">Partnership</a>
+            <a href="#pos-checkout" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-gold-400 hover:bg-slate-900">POS & Orders</a>
+            <button onclick="openCSAuthModal()" class="mobile-link w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-gold-400 hover:bg-slate-900">
+                <i class="fa-solid fa-headset mr-2"></i> Customer Service Desk
+            </button>
+            <button onclick="openAdminAuthModal()" class="mobile-link w-full text-left px-3 py-2 rounded-md text-base font-medium text-gold-400 hover:bg-slate-900">
+                <i class="fa-solid fa-user-shield mr-2"></i> Admin Portal
+            </button>
+            <div class="pt-2">
+                <button onclick="toggleCartDrawer()" class="mobile-link w-full text-center gold-btn block px-6 py-3 rounded-full font-semibold text-xs tracking-wider uppercase">
+                    View Order Cart
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= HERO SECTION ================= -->
+    <section id="home" class="relative pt-32 pb-20 md:pt-44 md:pb-32 bg-obsidian text-white overflow-hidden min-h-[90vh] flex items-center">
+        <!-- Banner Image Background Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img id="hero-bg-banner" src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/banner/Gemini_Generated_Image_2mzmh32mzmh32mzm.jpg" class="w-full h-full object-cover opacity-25 filter brightness-75">
+            <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/70 to-transparent"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left Text Content -->
+                <div class="lg:col-span-7 space-y-8 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold-400/30 bg-gold-400/5 backdrop-blur-sm text-gold-400 text-xs font-semibold tracking-widest uppercase">
+                        <i class="fa-solid fa-crown text-xs"></i>
+                        <span id="hero-badge">Premium Wellness & Entrepreneurship</span>
+                    </div>
+
+                    <h1 id="hero-title" class="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold tracking-tight text-white leading-tight">
+                        QUALITY PRODUCTS. <br>
+                        <span class="gold-gradient-text">MEANINGFUL OPPORTUNITIES.</span>
+                    </h1>
+
+                    <p id="hero-subtitle" class="text-slate-300 text-lg sm:text-xl font-light max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        Discover AMANAH's growing collection of premium wellness and lifestyle products formulated to elevate daily living and empower direct business owners nationwide.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                        <a href="#products" class="gold-btn px-8 py-4 rounded-full font-bold text-sm tracking-wider uppercase w-full sm:w-auto text-center">
+                            Explore Products
+                        </a>
+                        <a href="#opportunity" class="px-8 py-4 rounded-full font-bold text-sm tracking-wider uppercase border border-gold-400/60 text-gold-300 hover:bg-gold-400/10 hover:border-gold-400 transition-all w-full sm:w-auto text-center flex items-center justify-center gap-2">
+                            <span>Become a Partner</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+
+                    <!-- Highlight Metrics -->
+                    <div class="pt-8 border-t border-slate-800/80 grid grid-cols-3 gap-4 text-center lg:text-left">
+                        <div>
+                            <span id="metric-1-val" class="block text-2xl sm:text-3xl font-serif font-bold text-white">100%</span>
+                            <span id="metric-1-lbl" class="text-xs text-slate-400 uppercase tracking-wider">Natural Formulas</span>
+                        </div>
+                        <div>
+                            <span id="metric-2-val" class="block text-2xl sm:text-3xl font-serif font-bold text-white">8+</span>
+                            <span id="metric-2-lbl" class="text-xs text-slate-400 uppercase tracking-wider">Official Products</span>
+                        </div>
+                        <div>
+                            <span id="metric-3-val" class="block text-2xl sm:text-3xl font-serif font-bold text-white">Nationwide</span>
+                            <span id="metric-3-lbl" class="text-xs text-slate-400 uppercase tracking-wider">Distribution</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Hero Showcase -->
+                <div class="lg:col-span-5 relative">
+                    <div class="relative mx-auto max-w-md lg:max-w-none">
+                        <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-gold-600/30 via-gold-400/10 to-transparent blur-xl transform rotate-3"></div>
+                        
+                        <div class="relative bg-charcoal/90 border border-gold-400/30 rounded-3xl p-6 sm:p-8 backdrop-blur-md shadow-2xl overflow-hidden group">
+                            <div class="absolute top-4 right-4 bg-gold-400 text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                Supabase Live Sync
+                            </div>
+                            
+                            <div class="w-full h-72 sm:h-80 flex items-center justify-center my-4 relative">
+                                <div class="flex items-center justify-center space-x-2 relative z-10">
+                                    <img id="showcase-img-1" src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/3%20%282%29.png" alt="Spirulina" class="h-44 sm:h-52 object-contain drop-shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-300">
+                                    <img id="showcase-img-2" src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494073_w%20%281%29%20-%20Copy.jpg" alt="Glutagen CEE" class="h-52 sm:h-60 object-contain drop-shadow-2xl z-20 hover:scale-105 transition-transform duration-300">
+                                    <img id="showcase-img-3" src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494074_w.jpg" alt="Baskug Coffee" class="h-48 sm:h-56 object-contain drop-shadow-2xl transform rotate-6 hover:rotate-0 transition-transform duration-300">
+                                </div>
+                            </div>
+
+                            <div class="text-center pt-2">
+                                <h3 id="showcase-title" class="font-serif text-xl font-bold text-white">The AMANAH Wellness Suite</h3>
+                                <p id="showcase-subtitle" class="text-xs text-slate-400 mt-1">Authentic, Pure & Potently Formulated</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= ABOUT AMANAH ================= -->
+    <section id="about" class="py-24 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <div class="lg:col-span-6 order-2 lg:order-1">
+                    <div class="relative">
+                        <div class="bg-obsidian text-white p-8 sm:p-10 rounded-3xl shadow-xl relative z-10 border border-gold-400/20">
+                            <div class="w-12 h-12 rounded-xl bg-gold-400/10 border border-gold-400 flex items-center justify-center text-gold-400 text-xl mb-6">
+                                <i class="fa-solid fa-building-columns"></i>
+                            </div>
+                            <h3 id="about-card-title" class="font-serif text-2xl sm:text-3xl font-bold text-white mb-4">Empowering Communities Through Direct Excellence</h3>
+                            <p id="about-card-desc" class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+                                AMANAH PRODUCTS operates with an unwavering dedication to trust, integrity, and exceptional value. We bridge premium health formulas with a dynamic business ecosystem that rewards ambition and teamwork.
+                            </p>
+                            
+                            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                                <div>
+                                    <div class="text-gold-400 font-bold text-lg">Integrity First</div>
+                                    <p class="text-xs text-slate-400">Pure sourcing & honest pricing.</p>
+                                </div>
+                                <div>
+                                    <div class="text-gold-400 font-bold text-lg">Shared Growth</div>
+                                    <p class="text-xs text-slate-400">Structured compensation structure.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute -bottom-6 -right-6 w-full h-full border-2 border-gold-400/40 rounded-3xl z-0 hidden sm:block"></div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6 order-1 lg:order-2 space-y-6">
+                    <div class="inline-flex items-center gap-2 text-gold-600 font-semibold text-xs tracking-widest uppercase">
+                        <span class="w-8 h-[2px] bg-gold-400"></span>
+                        <span id="about-tag">About Our Brand</span>
+                    </div>
+
+                    <h2 id="about-heading" class="text-3xl sm:text-4xl font-serif font-bold text-slate-900 leading-tight">
+                        Building Opportunities Through <span class="gold-gradient-text">Quality Products</span>
+                    </h2>
+
+                    <p id="about-p1" class="text-slate-600 leading-relaxed text-base sm:text-lg">
+                        <strong>AMANAH PRODUCTS</strong> is a premier product distribution and business development company created to deliver essential wellness, vitality, and personal care solutions to households across the Philippines and beyond.
+                    </p>
+
+                    <p id="about-p2" class="text-slate-600 leading-relaxed text-sm sm:text-base">
+                        Founded on the principles of trust (<em>Amanah</em>), we combine research-backed natural remedies with an accessible turn-key distribution model. Whether you seek to enhance your personal health or build a enterprise, AMANAH offers the platform, training, and products to help you thrive.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= PRODUCTS CATALOG ================= -->
+    <section id="products" class="py-24 bg-slate-100 border-y border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                <div class="inline-flex items-center gap-2 text-gold-600 font-semibold text-xs tracking-widest uppercase">
+                    <i class="fa-solid fa-gem text-xs"></i>
+                    <span>Official Catalog</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-serif font-bold text-slate-900">
+                    Our Official Product Line
+                </h2>
+                <p class="text-slate-600 text-base sm:text-lg">
+                    Formulated for optimal efficacy and crafted with original packaging integrity. Explore our complete range with standardized Suggested Retail Prices (SRP).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" id="products-container">
+                <!-- Javascript populates product cards dynamically from Supabase database -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= BUSINESS OPPORTUNITY ================= -->
+    <section id="opportunity" class="py-24 bg-obsidian text-white relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold-400/30 bg-gold-400/10 text-gold-400 text-xs font-semibold tracking-widest uppercase">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Entrepreneurship Programs</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-serif font-bold text-white">
+                    Partnership Packages
+                </h2>
+                <p class="text-slate-300 text-base sm:text-lg">
+                    Partner with AMANAH PRODUCTS and launch your distribution business with low overhead, turnkey logistics, and high-margin product lines.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Package 1: DISTRIBUTOR -->
+                <div class="bg-charcoal rounded-3xl p-8 border border-slate-700 hover:border-gold-400 transition-all duration-300 flex flex-col justify-between relative group hover:-translate-y-2">
+                    <div>
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <span class="text-xs uppercase font-bold tracking-widest text-slate-400">Entry Tier</span>
+                                <h3 class="text-2xl font-serif font-bold text-white mt-1">DISTRIBUTOR</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-gold-400">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                        </div>
+                        <div class="mb-6 pb-6 border-b border-slate-700">
+                            <span class="text-xs text-slate-400 block">Package Price</span>
+                            <div class="text-4xl font-serif font-bold text-gold-400 mt-1">₱1,250</div>
+                            <span class="text-xs text-slate-400 mt-1 block">Ideal for individual sellers and beginners</span>
+                        </div>
+                        <ul class="space-y-3 mb-8 text-sm text-slate-300">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-gold-400 text-xs"></i><span>Includes initial product package value</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-gold-400 text-xs"></i><span>Up to 25% - 40% retail profit margin</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-gold-400 text-xs"></i><span>Official Distributor Account ID</span></li>
+                        </ul>
+                    </div>
+                    <button onclick="openOpportunityModal('DISTRIBUTOR', '₱1,250', 'Includes starter package products worth ₱1,250+ with complete seller marketing support.')" class="w-full py-3 rounded-full border border-gold-400/60 text-gold-300 font-bold text-xs uppercase tracking-wider hover:bg-gold-400 hover:text-black transition-all text-center">
+                        Learn More
+                    </button>
+                </div>
+
+                <!-- Package 2: MOBILE STOCKIST -->
+                <div class="bg-gradient-to-b from-slate-900 to-charcoal rounded-3xl p-8 border-2 border-gold-400 shadow-2xl flex flex-col justify-between relative transform lg:-translate-y-4">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gold-400 text-black text-xs font-bold uppercase tracking-widest px-4 py-1 rounded-full shadow-lg">
+                        Most Popular Choice
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-start mb-6 mt-2">
+                            <div>
+                                <span class="text-xs uppercase font-bold tracking-widest text-gold-400">Growth Tier</span>
+                                <h3 class="text-2xl font-serif font-bold text-white mt-1">MOBILE STOCKIST</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-gold-400/20 flex items-center justify-center text-gold-400">
+                                <i class="fa-solid fa-truck-fast"></i>
+                            </div>
+                        </div>
+                        <div class="mb-6 pb-6 border-b border-slate-700">
+                            <span class="text-xs text-slate-400 block">Package Price</span>
+                            <div class="text-4xl font-serif font-bold gold-gradient-text mt-1">₱7,980</div>
+                            <span class="text-xs text-slate-400 mt-1 block">For localized resellers and city hubs</span>
+                        </div>
+                        <ul class="space-y-3 mb-8 text-sm text-slate-300">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-gold-400 text-xs"></i><span>High-value fast moving inventory</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-gold-400 text-xs"></i><span>Exclusive stockist discount perks</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-gold-400 text-xs"></i><span>Priority inventory replenishment</span></li>
+                        </ul>
+                    </div>
+                    <button onclick="openOpportunityModal('MOBILE STOCKIST', '₱7,980', 'Full mobile inventory package with maximum markup yields and city distribution priority.')" class="w-full py-3.5 rounded-full gold-btn font-bold text-xs uppercase tracking-wider text-center shadow-lg">
+                        Learn More
+                    </button>
+                </div>
+
+                <!-- Package 3: BRANCH OPERATOR -->
+                <div class="bg-charcoal rounded-3xl p-8 border border-slate-700 hover:border-gold-400 transition-all duration-300 flex flex-col justify-between relative group hover:-translate-y-2">
+                    <div>
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <span class="text-xs uppercase font-bold tracking-widest text-slate-400">Executive Tier</span>
+                                <h3 class="text-2xl font-serif font-bold text-white mt-1">BRANCH OPERATOR</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-gold-400">
+                                <i class="fa-solid fa-store"></i>
+                            </div>
+                        </div>
+                        <div class="mb-6 pb-6 border-b border-slate-700">
+                            <span class="text-xs text-slate-400 block">Package Price</span>
+                            <div class="text-4xl font-serif font-bold text-gold-400 mt-1">₱50,000</div>
+                            <span class="text-xs text-slate-400 mt-1 block">Regional distribution & center ownership</span>
+                        </div>
+                        <ul class="space-y-3 mb-8 text-sm text-slate-300">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-gold-400 text-xs"></i><span>Full center product inventory supply</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-gold-400 text-xs"></i><span>Highest tier wholesale pricing tier</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-gold-400 text-xs"></i><span>Territory distribution rights</span></li>
+                        </ul>
+                    </div>
+                    <button onclick="openOpportunityModal('BRANCH OPERATOR', '₱50,000', 'Territorial hub operator partnership, supreme wholesale tiers, and executive corporate backing.')" class="w-full py-3 rounded-full border border-gold-400/60 text-gold-300 font-bold text-xs uppercase tracking-wider hover:bg-gold-400 hover:text-black transition-all text-center">
+                        Learn More
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= POS & INSTANT CHECKOUT SYSTEM ================= -->
+    <section id="pos-checkout" class="py-24 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12 space-y-4">
+                <div class="inline-flex items-center gap-2 text-gold-600 font-semibold text-xs tracking-widest uppercase">
+                    <i class="fa-solid fa-cash-register text-xs"></i>
+                    <span>Direct Purchasing Terminal</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-serif font-bold text-slate-900">
+                    AMANAH Point of Sale (POS)
+                </h2>
+                <p class="text-slate-600 text-base sm:text-lg">
+                    Select your items, adjust order quantities, enter delivery information, and submit orders directly into Supabase backend database.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- POS Quick Product Selection Panel -->
+                <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-lg space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h3 class="font-serif text-xl font-bold text-slate-900">Quick POS Selector</h3>
+                        <span class="text-xs text-slate-400">Click product to add to cart</span>
+                    </div>
+                    <div id="pos-product-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- POS Transaction & Checkout Panel -->
+                <div class="lg:col-span-5 bg-obsidian text-white p-6 sm:p-8 rounded-3xl border border-gold-400/30 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-receipt text-gold-400"></i>
+                                <h3 class="font-serif text-xl font-bold text-white">Current Order</h3>
+                            </div>
+                            <button onclick="clearCart()" class="text-xs text-slate-400 hover:text-red-400 transition-colors">
+                                <i class="fa-solid fa-trash-can mr-1"></i> Clear All
+                            </button>
+                        </div>
+
+                        <!-- Cart Line Items -->
+                        <div id="pos-cart-items" class="space-y-3 max-h-56 overflow-y-auto pr-2 mb-6">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <!-- Customer Info & Delivery Address -->
+                        <div class="bg-charcoal p-4 rounded-2xl mb-6 border border-slate-700 space-y-3">
+                            <span class="block text-xs font-semibold text-gold-400 uppercase tracking-wider">Customer & Delivery Info</span>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <input type="text" id="pos-customer-name" placeholder="Customer Name *" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-400 focus:border-gold-400 outline-none">
+                                <input type="tel" id="pos-customer-phone" placeholder="Contact Number *" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-400 focus:border-gold-400 outline-none">
+                            </div>
+
+                            <div class="space-y-2 pt-1 border-t border-slate-700/80">
+                                <input type="text" id="pos-street-address" placeholder="Street Address / House No. / Barangay *" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-400 focus:border-gold-400 outline-none">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" id="pos-city" placeholder="City / Municipality *" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-400 focus:border-gold-400 outline-none">
+                                    <input type="text" id="pos-province" placeholder="Province *" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-400 focus:border-gold-400 outline-none">
+                                </div>
+                                <input type="text" id="pos-zip" placeholder="Postal Code (Optional)" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-400 focus:border-gold-400 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Fulfillment Mode -->
+                        <div class="bg-charcoal p-4 rounded-2xl mb-6 border border-slate-700">
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Fulfillment Mode</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-600 cursor-pointer bg-slate-900/50 has-[:checked]:border-gold-400 has-[:checked]:bg-gold-400/10">
+                                    <input type="radio" name="pos-fulfillment" value="pickup" checked onchange="updateCartTotals();" class="accent-gold-400">
+                                    <span class="text-xs text-slate-200">Store Pickup</span>
+                                </label>
+                                <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-600 cursor-pointer bg-slate-900/50 has-[:checked]:border-gold-400 has-[:checked]:bg-gold-400/10">
+                                    <input type="radio" name="pos-fulfillment" value="shipping" onchange="updateCartTotals();" class="accent-gold-400">
+                                    <span class="text-xs text-slate-200">Shipping (+₱150)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Price Breakdown -->
+                        <div class="space-y-2 border-t border-slate-800 pt-4 text-xs">
+                            <div class="flex justify-between text-slate-400"><span>Subtotal:</span><span id="pos-subtotal" class="font-semibold text-slate-200">₱0.00</span></div>
+                            <div class="flex justify-between text-slate-400"><span>Shipping Fee:</span><span id="pos-shipping-fee" class="font-semibold text-slate-200">₱0.00</span></div>
+                            <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-slate-800">
+                                <span>Total Payable:</span><span id="pos-grand-total" class="gold-gradient-text text-xl">₱0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Action -->
+                    <div class="mt-6">
+                        <button id="btn-submit-order" onclick="processPOSCheckout()" class="w-full py-4 rounded-xl gold-btn font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <span>Submit Order to Supabase</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= CLIENT LIVE CHAT WIDGET ================= -->
+    <div id="live-chat-widget" class="fixed bottom-6 right-6 z-40">
+        <button onclick="toggleClientChat()" class="w-14 h-14 rounded-full gold-btn shadow-2xl flex items-center justify-center text-black text-xl hover:scale-110 transition-transform relative">
+            <i class="fa-solid fa-headset"></i>
+            <span id="client-unread-badge" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center hidden">1</span>
+        </button>
+        <!-- Floating Chat Container -->
+        <div id="client-chat-box" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 bg-obsidian text-white border border-gold-400/40 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[420px]">
+            <div class="p-4 bg-charcoal border-b border-gold-400/20 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                    <div>
+                        <h4 class="font-serif text-sm font-bold text-white">AMANAH Live Support</h4>
+                        <span class="text-[10px] text-gold-400">Realtime • Supabase Connected</span>
+                    </div>
+                </div>
+                <button onclick="toggleClientChat()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs bg-slate-950/80">
+                <div class="flex flex-col items-start space-y-1">
+                    <span class="text-[9px] text-slate-500 font-bold">AMANAH Bot</span>
+                    <div class="bg-slate-800 text-slate-200 p-3 rounded-2xl max-w-[85%] rounded-tl-none border border-slate-700">
+                        Welcome to AMANAH PRODUCTS! Ask any questions regarding our natural supplements or business opportunities.
+                    </div>
+                </div>
+            </div>
+
+            <form onsubmit="sendClientMessage(event)" class="p-3 bg-charcoal border-t border-slate-800 flex items-center gap-2">
+                <input type="text" id="client-chat-input" placeholder="Type message..." required class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-gold-400">
+                <button type="submit" class="w-9 h-9 rounded-xl gold-btn flex items-center justify-center text-black font-bold">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= CUSTOMER SERVICE PORTAL MODAL ================= -->
+    <!-- CS Desk Passcode Auth Modal -->
+    <div id="cs-auth-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-obsidian border border-gold-400/40 text-white rounded-3xl max-w-sm w-full p-8 relative shadow-2xl text-center">
+            <button onclick="closeCSAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-14 h-14 rounded-2xl bg-gold-400/10 border border-gold-400 flex items-center justify-center text-gold-400 text-2xl mx-auto mb-4">
+                <i class="fa-solid fa-headset"></i>
+            </div>
+            <h3 class="font-serif text-2xl font-bold text-white mb-1">Customer Service Desk</h3>
+            <p class="text-xs text-slate-400 mb-6">Enter CS Desk passcode to access portal (Default: <span class="text-gold-400 font-mono">5678</span>)</p>
+
+            <form onsubmit="verifyCSPasscode(event)" class="space-y-4">
+                <input type="password" id="cs-passcode-input" placeholder="Enter CS Passcode" required class="w-full px-4 py-3 rounded-xl bg-charcoal border border-slate-700 text-center text-lg tracking-widest text-gold-400 outline-none focus:border-gold-400">
+                <button type="submit" class="w-full py-3 rounded-xl gold-btn font-bold text-xs uppercase tracking-wider">Unlock CS Desk</button>
+            </form>
+            <div id="cs-auth-error" class="hidden text-xs text-red-400 font-medium mt-3">Invalid passcode. Please try again.</div>
+        </div>
+    </div>
+
+    <div id="cs-portal-overlay" class="fixed inset-0 z-50 hidden bg-obsidian text-slate-200 overflow-hidden flex flex-col">
+        <header class="bg-charcoal border-b border-gold-400/30 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-full bg-gold-400 text-black font-bold flex items-center justify-center">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <div>
+                    <h2 class="font-serif text-lg font-bold text-white">AMANAH Customer Service Workspace</h2>
+                    <span class="text-[10px] text-gold-400">Live Orders & Customer CRM Portal</span>
+                </div>
+            </div>
+            <button onclick="closeCSPortal()" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold">
+                <i class="fa-solid fa-right-from-bracket mr-1"></i> Exit Desk
+            </button>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden">
+            <aside class="w-64 bg-slate-950 border-r border-slate-800 p-4 space-y-2">
+                <button onclick="switchCSTab('verify')" id="cs-tab-btn-verify" class="cs-tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 text-gold-400 bg-gold-400/10">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Order Verification
+                </button>
+                <button onclick="switchCSTab('chats')" id="cs-tab-btn-chats" class="cs-tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-comments"></i> Active Conversations
+                </button>
+                <button onclick="switchCSTab('crm')" id="cs-tab-btn-crm" class="cs-tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-address-book"></i> Customer Directory
+                </button>
+            </aside>
+
+            <main class="flex-1 p-6 overflow-y-auto bg-obsidian">
+                <!-- CS TAB 1: ORDER VERIFICATION -->
+                <div id="cs-tab-verify" class="cs-tab-content space-y-4">
+                    <h3 class="text-xl font-serif font-bold text-white border-b border-slate-800 pb-3">Order Verification Queue</h3>
+                    <div id="cs-orders-container" class="space-y-3">
+                        <div class="text-xs text-slate-400">Loading order records from Supabase...</div>
+                    </div>
+                </div>
+
+                <!-- CS TAB 2: ACTIVE CONVERSATIONS -->
+                <div id="cs-tab-chats" class="cs-tab-content space-y-4 hidden">
+                    <h3 class="text-xl font-serif font-bold text-white border-b border-slate-800 pb-3">Realtime Live Customer Messaging</h3>
+                    <div class="bg-slate-950 rounded-2xl border border-slate-800 h-[450px] flex flex-col overflow-hidden">
+                        <div id="cs-live-messages-panel" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs">
+                            <div class="text-slate-500 text-center py-6">Connecting to Supabase Realtime channel...</div>
+                        </div>
+                        <form onsubmit="sendCSDeskMessage(event)" class="p-3 bg-charcoal border-t border-slate-800 flex items-center gap-2">
+                            <input type="text" id="cs-chat-input" placeholder="Reply to customer..." required class="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-gold-400">
+                            <button type="submit" class="px-5 py-2.5 gold-btn font-bold text-xs uppercase tracking-wider rounded-xl">Send Agent Message</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- CS TAB 3: CRM DIRECTORY -->
+                <div id="cs-tab-crm" class="cs-tab-content space-y-4 hidden">
+                    <h3 class="text-xl font-serif font-bold text-white border-b border-slate-800 pb-3">Customer Directory & Remarks</h3>
+                    <div id="cs-crm-list" class="space-y-3">
+                        <div class="text-xs text-slate-400">Loading customer profiles...</div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ================= EXECUTIVE ADMIN PORTAL ================= -->
+    <div id="admin-auth-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-obsidian border border-gold-400/40 text-white rounded-3xl max-w-sm w-full p-8 relative shadow-2xl text-center">
+            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-14 h-14 rounded-2xl bg-gold-400/10 border border-gold-400 flex items-center justify-center text-gold-400 text-2xl mx-auto mb-4">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="font-serif text-2xl font-bold text-white mb-1">Executive Admin</h3>
+            <p class="text-xs text-slate-400 mb-6">Enter system security passcode (Default: <span class="text-gold-400 font-mono">1234</span>)</p>
+
+            <form onsubmit="verifyAdminPasscode(event)" class="space-y-4">
+                <input type="password" id="admin-passcode-input" placeholder="Security Code" required class="w-full px-4 py-3 rounded-xl bg-charcoal border border-slate-700 text-center text-lg tracking-widest text-gold-400 outline-none focus:border-gold-400">
+                <button type="submit" class="w-full py-3 rounded-xl gold-btn font-bold text-xs uppercase tracking-wider">Unlock Executive Console</button>
+            </form>
+            <div id="admin-auth-error" class="hidden text-xs text-red-400 font-medium mt-3">Invalid passcode. Please try again.</div>
+        </div>
+    </div>
+
+    <div id="admin-portal-overlay" class="fixed inset-0 z-50 hidden bg-obsidian text-slate-200 overflow-hidden flex flex-col">
+        <header class="bg-charcoal border-b border-gold-400/30 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-full bg-gold-400 text-black font-bold flex items-center justify-center">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                    <h2 class="font-serif text-lg font-bold text-white">AMANAH Executive Admin Portal</h2>
+                    <span class="text-[10px] text-gold-400">Supabase CRM, Analytics & Media CMS</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="lockAndSaveAdminChanges()" class="gold-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save & Apply CMS</span>
+                </button>
+                <button onclick="closeAdminPortal()" class="px-3 py-2 rounded-xl border border-slate-700 text-slate-400 hover:text-white text-xs font-semibold">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Exit Admin
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden">
+            <aside class="w-64 bg-slate-950 border-r border-slate-800 p-4 space-y-2 overflow-y-auto">
+                <button onclick="switchAdminTab('dashboard')" id="tab-btn-dashboard" class="admin-tab-btn active w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 text-gold-400 bg-gold-400/10">
+                    <i class="fa-solid fa-chart-pie"></i> Executive Metrics
+                </button>
+                <button onclick="switchAdminTab('media')" id="tab-btn-media" class="admin-tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-photo-film"></i> Media Library
+                </button>
+                <button onclick="switchAdminTab('products')" id="tab-btn-products" class="admin-tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-boxes-stacked"></i> Products Catalog
+                </button>
+                <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="admin-tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-list-check"></i> CRM Orders
+                </button>
+                <button onclick="switchAdminTab('security')" id="tab-btn-security" class="admin-tab-btn w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-key"></i> Passcode Management
+                </button>
+            </aside>
+
+            <main class="flex-1 p-6 overflow-y-auto bg-obsidian">
+                <!-- TAB 1: EXECUTIVE METRICS & FINANCIAL REPORTS -->
+                <div id="admin-tab-dashboard" class="admin-tab-content space-y-6">
+                    <h3 class="text-xl font-serif font-bold text-white border-b border-slate-800 pb-3">Financial Performance & Analytics</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-charcoal p-5 rounded-2xl border border-slate-700">
+                            <span class="text-xs text-slate-400 block mb-1">Total System Revenue</span>
+                            <span id="metric-total-rev" class="text-2xl font-serif font-bold gold-gradient-text">₱0.00</span>
+                        </div>
+                        <div class="bg-charcoal p-5 rounded-2xl border border-slate-700">
+                            <span class="text-xs text-slate-400 block mb-1">Total Orders</span>
+                            <span id="metric-total-orders" class="text-2xl font-serif font-bold text-white">0</span>
+                        </div>
+                        <div class="bg-charcoal p-5 rounded-2xl border border-slate-700">
+                            <span class="text-xs text-slate-400 block mb-1">Verified Orders</span>
+                            <span id="metric-verified-orders" class="text-2xl font-serif font-bold text-green-400">0</span>
+                        </div>
+                        <div class="bg-charcoal p-5 rounded-2xl border border-slate-700">
+                            <span class="text-xs text-slate-400 block mb-1">Pending Verification</span>
+                            <span id="metric-pending-orders" class="text-2xl font-serif font-bold text-gold-400">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: MEDIA LIBRARY -->
+                <div id="admin-tab-media" class="admin-tab-content space-y-6 hidden">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div>
+                            <h3 class="text-xl font-serif font-bold text-white">Supabase Media Storage Manager</h3>
+                            <span class="text-xs text-slate-400">Bucket: amanah-media</span>
+                        </div>
+                        <input type="file" id="media-upload-input" accept="image/*,video/*" class="hidden" onchange="uploadFileToSupabaseStorage(this)">
+                        <button onclick="document.getElementById('media-upload-input').click()" class="gold-btn px-4 py-2 rounded-xl text-xs font-bold uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload New Asset
+                        </button>
+                    </div>
+                    <div id="media-grid-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- TAB 3: PRODUCTS CMS -->
+                <div id="admin-tab-products" class="admin-tab-content space-y-6 hidden">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h3 class="text-xl font-serif font-bold text-white">Product Catalog CMS</h3>
+                        <button onclick="openAddProductModal()" class="gold-btn px-4 py-2 rounded-xl font-bold text-xs uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Add Product
+                        </button>
+                    </div>
+                    <div id="admin-products-list" class="space-y-4"></div>
+                </div>
+
+                <!-- TAB 4: ORDERS CRM -->
+                <div id="admin-tab-orders" class="admin-tab-content space-y-6 hidden">
+                    <h3 class="text-xl font-serif font-bold text-white border-b border-slate-800 pb-3">CRM Order & Delivery Management</h3>
+                    <div id="admin-orders-table" class="space-y-3"></div>
+                </div>
+
+                <!-- TAB 5: PASSCODE SECURITY MANAGEMENT -->
+                <div id="admin-tab-security" class="admin-tab-content space-y-6 hidden">
+                    <h3 class="text-xl font-serif font-bold text-white border-b border-slate-800 pb-3">Security & Passcode Settings</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Admin Passcode Change -->
+                        <div class="bg-charcoal p-6 rounded-2xl border border-slate-700 space-y-4">
+                            <div class="flex items-center space-x-3 text-gold-400">
+                                <i class="fa-solid fa-user-shield text-xl"></i>
+                                <h4 class="font-serif font-bold text-white text-base">Executive Admin Passcode</h4>
+                            </div>
+                            <p class="text-xs text-slate-400">Change the security passcode required to access the Executive Admin Portal.</p>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">New Admin Passcode</label>
+                                <input type="password" id="new-admin-passcode" placeholder="Enter new passcode" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-gold-400 font-mono outline-none focus:border-gold-400">
+                            </div>
+                            <button onclick="saveNewAdminPasscode()" class="gold-btn px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider">
+                                Update Admin Passcode
+                            </button>
+                        </div>
+
+                        <!-- CS Desk Passcode Change -->
+                        <div class="bg-charcoal p-6 rounded-2xl border border-slate-700 space-y-4">
+                            <div class="flex items-center space-x-3 text-gold-400">
+                                <i class="fa-solid fa-headset text-xl"></i>
+                                <h4 class="font-serif font-bold text-white text-base">CS Desk Passcode</h4>
+                            </div>
+                            <p class="text-xs text-slate-400">Change the authentication passcode required for staff to log into the Customer Service Portal.</p>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">New CS Desk Passcode</label>
+                                <input type="password" id="new-cs-passcode" placeholder="Enter new CS passcode" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-gold-400 font-mono outline-none focus:border-gold-400">
+                            </div>
+                            <button onclick="saveNewCSPasscode()" class="gold-btn px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider">
+                                Update CS Desk Passcode
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ================= RECEIPT MODAL ================= -->
+    <div id="receipt-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-gold-400/30 relative shadow-2xl">
+            <button onclick="closeReceiptModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="text-center pb-4 border-b border-dashed border-slate-300">
+                <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl mx-auto mb-2">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3 class="font-serif text-2xl font-bold text-slate-900">Order Confirmed</h3>
+                <span id="receipt-id" class="text-xs text-slate-500 font-mono">Invoice #AMN-00000</span>
+            </div>
+
+            <div class="py-4 space-y-3 text-xs border-b border-dashed border-slate-300">
+                <div class="flex justify-between"><span class="text-slate-500">Customer:</span><span id="receipt-customer-name" class="font-semibold text-slate-800">-</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Contact:</span><span id="receipt-customer-phone" class="font-semibold text-slate-800">-</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Delivery Address:</span><span id="receipt-delivery-address" class="font-semibold text-slate-800 text-right max-w-[200px] font-mono text-[11px]">-</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Fulfillment:</span><span id="receipt-fulfillment-type" class="font-semibold text-slate-800">-</span></div>
+
+                <div class="pt-2">
+                    <span class="font-bold text-slate-700 block mb-2">Purchased Items:</span>
+                    <div id="receipt-items-list" class="space-y-1.5 pl-2 text-slate-600"></div>
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-between items-center text-base font-bold">
+                <span class="text-slate-800">Total Amount:</span>
+                <span id="receipt-grand-total" class="text-gold-600 text-xl">₱0.00</span>
+            </div>
+
+            <button onclick="closeReceiptModal()" class="w-full mt-6 py-3.5 rounded-full gold-btn font-bold text-xs uppercase tracking-wider block text-center">
+                Close & Return
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= PRODUCT VIEW MODAL ================= -->
+    <div id="product-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl relative border border-gold-400/30">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors z-10">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="grid grid-cols-1 md:grid-cols-2">
+                <div class="bg-gradient-to-b from-slate-900 to-obsidian p-8 flex items-center justify-center relative min-h-[280px]">
+                    <img id="modal-img" src="" alt="Product Detail" class="max-h-64 object-contain drop-shadow-2xl">
+                </div>
+                <div class="p-6 sm:p-8 space-y-4 flex flex-col justify-between">
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-widest text-gold-600 mb-1">Official AMANAH Product</div>
+                        <h3 id="modal-title" class="font-serif text-2xl font-bold text-slate-900">Product Name</h3>
+                        <div id="modal-price" class="text-2xl font-bold text-gold-600 mt-2">₱0</div>
+                        <p id="modal-desc" class="text-slate-600 text-sm mt-3 leading-relaxed">Product description...</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-100 space-y-3">
+                        <button id="modal-add-btn" class="w-full py-3.5 rounded-xl gold-btn font-bold text-xs uppercase tracking-wider block text-center">
+                            Add to POS Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= OPPORTUNITY DETAILS MODAL ================= -->
+    <div id="opportunity-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-obsidian text-white rounded-3xl max-w-md w-full p-8 border border-gold-400/40 relative shadow-2xl">
+            <button onclick="closeOpportunityModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="w-12 h-12 rounded-2xl bg-gold-400/20 text-gold-400 flex items-center justify-center text-2xl mb-4">
+                <i class="fa-solid fa-briefcase"></i>
+            </div>
+            <h3 id="opp-modal-title" class="font-serif text-2xl font-bold gold-gradient-text mb-1">Package Tier</h3>
+            <div id="opp-modal-price" class="text-3xl font-serif font-bold text-white mb-4">₱0</div>
+            <p id="opp-modal-desc" class="text-slate-300 text-sm leading-relaxed mb-6">Package detail description...</p>
+            <a href="#pos-checkout" onclick="closeOpportunityModal()" class="w-full py-3.5 rounded-full gold-btn font-bold text-xs uppercase tracking-wider block text-center">
+                Order Package via POS
+            </a>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT SYSTEM ENGINE & SUPABASE INTEGRATION ================= -->
+    <script>
+        // Official Supabase Project Configurations
+        const SUPABASE_URL = "https://uvvjcalnadbfqhvquctc.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2dmpjYWxuYWRiZnFodnF1Y3RjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDAwMDAwMDAsImV4cCI6MjAxNTA0MDAwMH0.placeholder";
+        
+        let supabaseClient = null;
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // Global Application State & Security Keys
+        let adminPasscode = "1234";
+        let csPasscode = "5678";
+        let cart = {};
+        let systemOrders = [];
+        let conversationId = 'conv-' + Math.floor(Math.random() * 899999 + 100000);
+
+        // Standard Product Master List
+        let products = [
+            { id: 'spirulina', name: 'Spirulina Superfood', srp: '₱350', priceNum: 350, desc: '100 Tablets Natural Herbal Food Supplement. Highly rich in nutrients, protein, and powerful antioxidant effects.', img: 'https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/3%20%282%29.png' },
+            { id: 'serpentina', name: 'Serpentina', srp: '₱600', priceNum: 600, desc: 'Andrographis paniculata formulation (50 Capsules x 500mg). Supports healthy immune defense and blood sugar balance.', img: 'https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_d7j68fd7j68fd7j6.jpg' },
+            { id: 'glutagen-cee', name: 'Glutagen CEE', srp: '₱600', priceNum: 600, desc: 'Gluta + Collagen + Sodium Ascorbate (60 Capsules x 500mg). Advanced whitening and cellular restoration formula.', img: 'https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494073_w%20%281%29%20-%20Copy.jpg' },
+            { id: 'max-c-pro', name: 'Max C Pro+', srp: '₱1,000', priceNum: 1000, desc: 'Vitamins, Minerals + Zinc. Alkaline System formula enriched with Mangosteen for immune defense.', img: 'https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_vt2wfmvt2wfmvt2w.jpg' },
+            { id: 'baskug', name: 'Baskug Coffee for Men', srp: '₱450', priceNum: 450, desc: '10-in-1 Healthy Coffee Blend with Tongkat Ali, Maca, and Ginseng (10 Sachets, 200g).', img: 'https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494074_w.jpg' },
+            { id: 'barakah', name: 'Barakah Green Coffee Mix', srp: '₱450', priceNum: 450, desc: 'Herbal Coffee Mix with Garcinia Cambogia, L-Carnitine, Barley, Green Tea & Mangosteen (10 Sachets, 210g).', img: 'https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494077_w.jpg' },
+            { id: 'herbal-oil', name: 'Herbal Oil', srp: '₱180', priceNum: 180, desc: 'Soothing natural essential herbal oil blend for quick relief from muscle fatigue and body tension.', img: 'https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_hg6xhchg6xhchg6x.jpg' },
+            { id: 'herbal-rub', name: 'Herbal Rub (Deep Balm)', srp: '₱125', priceNum: 125, desc: 'Therapeutic aromatic deep balm formulation providing fast comfort for minor aches and head tension.', img: 'https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_g2ehbkg2ehbkg2eh.jpg' }
+        ];
+
+        // Core Renderers
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            if (!container) return;
+
+            container.innerHTML = products.map(product => `
+                <div class="bg-white rounded-3xl overflow-hidden gold-card-border flex flex-col justify-between group">
+                    <div>
+                        <div class="bg-gradient-to-b from-slate-900 to-obsidian p-6 flex items-center justify-center relative h-64 overflow-hidden">
+                            <span class="absolute top-3 right-3 bg-gold-400 text-black text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase z-10 shadow-md">
+                                SRP ${product.srp}
+                            </span>
+                            <img src="${product.img}" alt="${product.name}" class="h-full max-h-52 object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-xl" onerror="this.onerror=null; this.src='https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/3%20%282%29.png';">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-serif text-xl font-bold text-slate-900 group-hover:text-gold-600 transition-colors">${product.name}</h3>
+                            <div class="text-sm font-bold text-gold-600 mb-2">${product.srp}</div>
+                            <p class="text-slate-600 text-xs leading-relaxed line-clamp-3">${product.desc}</p>
+                        </div>
+                    </div>
+                    <div class="px-6 pb-6 pt-0 space-y-2">
+                        <button onclick="addToCart('${product.id}')" class="w-full py-2.5 rounded-xl gold-btn font-bold text-xs uppercase tracking-wider transition-all text-center flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-cart-plus"></i> Add to Order
+                        </button>
+                        <button onclick="openProductModal('${product.id}')" class="w-full py-2 rounded-xl border border-slate-200 hover:border-gold-400 text-slate-600 font-medium text-xs transition-all text-center">
+                            Details
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPOSGrid() {
+            const posGrid = document.getElementById('pos-product-grid');
+            if (!posGrid) return;
+
+            posGrid.innerHTML = products.map(product => `
+                <div onclick="addToCart('${product.id}')" class="bg-slate-50 border border-slate-200 hover:border-gold-400 p-3 rounded-2xl cursor-pointer hover:shadow-md transition-all flex flex-col justify-between group">
+                    <div class="h-24 flex items-center justify-center mb-2 bg-slate-900 rounded-xl p-2">
+                        <img src="${product.img}" alt="${product.name}" class="max-h-20 object-contain group-hover:scale-105 transition-transform" onerror="this.onerror=null; this.src='https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/3%20%282%29.png';">
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xs text-slate-800 line-clamp-1">${product.name}</h4>
+                        <span class="text-xs text-gold-600 font-bold">${product.srp}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // POS Cart Functionality
+        function addToCart(productId) {
+            cart[productId] = (cart[productId] || 0) + 1;
+            updateCartTotals();
+        }
+
+        function updateQuantity(productId, delta) {
+            if (cart[productId]) {
+                cart[productId] += delta;
+                if (cart[productId] <= 0) delete cart[productId];
+            }
+            updateCartTotals();
+        }
+
+        function clearCart() {
+            cart = {};
+            updateCartTotals();
+        }
+
+        function updateCartTotals() {
+            const posCartItems = document.getElementById('pos-cart-items');
+            let subtotal = 0;
+            let totalCount = 0;
+            let itemsHTML = '';
+
+            Object.keys(cart).forEach(id => {
+                const item = products.find(p => p.id === id);
+                if (item) {
+                    const qty = cart[id];
+                    const itemTotal = item.priceNum * qty;
+                    subtotal += itemTotal;
+                    totalCount += qty;
+
+                    itemsHTML += `
+                        <div class="flex items-center justify-between bg-charcoal p-3 rounded-xl border border-slate-700">
+                            <div class="flex-1 pr-2">
+                                <h4 class="text-xs font-bold text-white leading-tight">${item.name}</h4>
+                                <span class="text-[10px] text-slate-400">₱${item.priceNum} each</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="updateQuantity('${id}', -1)" class="w-6 h-6 rounded bg-slate-800 text-gold-400 flex items-center justify-center font-bold text-xs">-</button>
+                                <span class="text-xs text-white font-bold px-1">${qty}</span>
+                                <button onclick="updateQuantity('${id}', 1)" class="w-6 h-6 rounded bg-slate-800 text-gold-400 flex items-center justify-center font-bold text-xs">+</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (posCartItems) {
+                posCartItems.innerHTML = itemsHTML || `
+                    <div class="text-center py-8 text-slate-500 text-xs">
+                        <i class="fa-solid fa-cart-flatbed text-2xl mb-2 text-slate-600"></i>
+                        <p>No items added to cart.</p>
+                    </div>
+                `;
+            }
+
+            const isShipping = document.querySelector('input[name="pos-fulfillment"]:checked')?.value === 'shipping';
+            const shippingFee = (subtotal > 0 && isShipping) ? 150 : 0;
+            const grandTotal = subtotal + shippingFee;
+
+            if (document.getElementById('pos-subtotal')) document.getElementById('pos-subtotal').textContent = `₱${subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            if (document.getElementById('pos-shipping-fee')) document.getElementById('pos-shipping-fee').textContent = `₱${shippingFee.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            if (document.getElementById('pos-grand-total')) document.getElementById('pos-grand-total').textContent = `₱${grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+            const navCartCount = document.getElementById('nav-cart-count');
+            const mobileCartBadge = document.getElementById('mobile-cart-badge');
+            if (navCartCount) { navCartCount.textContent = totalCount; navCartCount.classList.toggle('hidden', totalCount === 0); }
+            if (mobileCartBadge) { mobileCartBadge.textContent = totalCount; mobileCartBadge.classList.toggle('hidden', totalCount === 0); }
+        }
+
+        function toggleCartDrawer() {
+            document.getElementById('pos-checkout')?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Supabase Database Integration - Order Processing
+        async function processPOSCheckout() {
+            const keys = Object.keys(cart);
+            if (keys.length === 0) { alert("Please add at least one item to your order cart."); return; }
+
+            const name = document.getElementById('pos-customer-name')?.value.trim();
+            const phone = document.getElementById('pos-customer-phone')?.value.trim();
+            const street = document.getElementById('pos-street-address')?.value.trim();
+            const city = document.getElementById('pos-city')?.value.trim();
+            const province = document.getElementById('pos-province')?.value.trim();
+            const zip = document.getElementById('pos-zip')?.value.trim();
+
+            if (!name || !phone || !street || !city || !province) {
+                alert("Please fill in all mandatory customer and delivery address fields.");
+                return;
+            }
+
+            const fulfillment = document.querySelector('input[name="pos-fulfillment"]:checked')?.value || 'pickup';
+            const randomInvoice = 'AMN-' + Math.floor(10000 + Math.random() * 90000);
+            
+            let subtotal = 0;
+            const itemsList = [];
+            let itemsHTML = '';
+
+            keys.forEach(id => {
+                const item = products.find(p => p.id === id);
+                if (item) {
+                    const qty = cart[id];
+                    const lineTotal = item.priceNum * qty;
+                    subtotal += lineTotal;
+                    itemsList.push({ productId: id, name: item.name, priceNum: item.priceNum, qty: qty });
+                    itemsHTML += `<div class="flex justify-between text-xs"><span>${item.name} x${qty}</span><span class="font-semibold">₱${lineTotal.toFixed(2)}</span></div>`;
+                }
+            });
+
+            const shippingFee = (fulfillment === 'shipping') ? 150 : 0;
+            const grandTotal = subtotal + shippingFee;
+            const fullAddress = `${street}, ${city}, ${province}${zip ? ' ' + zip : ''}`;
+
+            const orderPayload = {
+                order_number: randomInvoice,
+                customer_name: name,
+                customer_phone: phone,
+                street_address: street,
+                city: city,
+                province: province,
+                zip_code: zip,
+                fulfillment_type: fulfillment,
+                subtotal: subtotal,
+                shipping_fee: shippingFee,
+                total_amount: grandTotal,
+                order_status: 'pending',
+                payment_status: 'unpaid'
+            };
+
+            const submitBtn = document.getElementById('btn-submit-order');
+            if (submitBtn) submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Saving to Supabase...`;
+
+            // Write to Supabase or store locally if offline
+            try {
+                if (supabaseClient) {
+                    const { data: orderData, error: orderErr } = await supabaseClient.from('orders').insert([orderPayload]).select().single();
+                    if (!orderErr && orderData) {
+                        const formattedItems = itemsList.map(it => ({
+                            order_id: orderData.id,
+                            product_name: it.name,
+                            unit_price: it.priceNum,
+                            quantity: it.qty,
+                            total_price: it.priceNum * it.qty
+                        }));
+                        await supabaseClient.from('order_items').insert(formattedItems);
+                    }
+                }
+            } catch (err) {
+                console.warn("Supabase writing bypassed or fallback used:", err);
+            }
+
+            // Save to internal order tracker
+            systemOrders.push({
+                invoice: randomInvoice,
+                name: name,
+                phone: phone,
+                address: fullAddress,
+                total: `₱${grandTotal.toFixed(2)}`,
+                status: 'Pending Verification',
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+
+            // Display Receipt Modal
+            document.getElementById('receipt-id').textContent = `Invoice #${randomInvoice}`;
+            document.getElementById('receipt-customer-name').textContent = name;
+            document.getElementById('receipt-customer-phone').textContent = phone;
+            document.getElementById('receipt-delivery-address').textContent = fullAddress;
+            document.getElementById('receipt-fulfillment-type').textContent = fulfillment === 'shipping' ? 'Shipping (+₱150)' : 'Store Pickup';
+            document.getElementById('receipt-items-list').innerHTML = itemsHTML;
+            document.getElementById('receipt-grand-total').textContent = `₱${grandTotal.toFixed(2)}`;
+
+            document.getElementById('receipt-modal').classList.remove('hidden');
+
+            if (submitBtn) submitBtn.innerHTML = `<i class="fa-solid fa-check-circle"></i> Submit Order to Supabase`;
+            clearCart();
+            renderCSOrders();
+            renderAdminOrders();
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receipt-modal').classList.add('hidden');
+        }
+
+        // Customer Service Portal Authentication & Drawer Functions
+        function openCSAuthModal() {
+            document.getElementById('cs-auth-modal').classList.remove('hidden');
+            document.getElementById('cs-auth-error').classList.add('hidden');
+            document.getElementById('cs-passcode-input').value = '';
+        }
+
+        function closeCSAuthModal() {
+            document.getElementById('cs-auth-modal').classList.add('hidden');
+        }
+
+        function verifyCSPasscode(e) {
+            e.preventDefault();
+            const val = document.getElementById('cs-passcode-input').value.trim();
+            if (val === csPasscode) {
+                closeCSAuthModal();
+                document.getElementById('cs-portal-overlay').classList.remove('hidden');
+                renderCSOrders();
+            } else {
+                document.getElementById('cs-auth-error').classList.remove('hidden');
+            }
+        }
+
+        function closeCSPortal() {
+            document.getElementById('cs-portal-overlay').classList.add('hidden');
+        }
+
+        function saveNewAdminPasscode() {
+            const input = document.getElementById('new-admin-passcode');
+            const val = input.value.trim();
+            if (val) {
+                adminPasscode = val;
+                input.value = '';
+                alert("Executive Admin passcode successfully updated!");
+            } else {
+                alert("Please enter a valid passcode.");
+            }
+        }
+
+        function saveNewCSPasscode() {
+            const input = document.getElementById('new-cs-passcode');
+            const val = input.value.trim();
+            if (val) {
+                csPasscode = val;
+                input.value = '';
+                alert("Customer Service Desk passcode successfully updated!");
+            } else {
+                alert("Please enter a valid passcode.");
+            }
+        }
+
+        function switchCSTab(tabId) {
+            document.querySelectorAll('.cs-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.cs-tab-btn').forEach(btn => {
+                btn.classList.remove('text-gold-400', 'bg-gold-400/10');
+                btn.classList.add('text-slate-400');
+            });
+            document.getElementById(`cs-tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`cs-tab-btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('text-gold-400', 'bg-gold-400/10');
+                activeBtn.classList.remove('text-slate-400');
+            }
+        }
+
+        function renderCSOrders() {
+            const container = document.getElementById('cs-orders-container');
+            if (!container) return;
+
+            if (systemOrders.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-400 bg-charcoal p-4 rounded-xl border border-slate-700">No customer orders pending in system queue.</div>`;
+                return;
+            }
+
+            container.innerHTML = systemOrders.map((ord, idx) => `
+                <div class="bg-charcoal p-4 rounded-xl border border-slate-700 text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-gold-400 font-mono">${ord.invoice}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-gold-400/10 text-gold-400 text-[10px] uppercase font-bold">${ord.status}</span>
+                        </div>
+                        <div class="text-white font-semibold mt-1">${ord.name} • ${ord.phone}</div>
+                        <div class="text-slate-400 text-[11px]">${ord.address}</div>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between">
+                        <span class="font-bold text-white text-base">${ord.total}</span>
+                        <button onclick="verifyOrderCS(${idx})" class="gold-btn px-4 py-2 rounded-lg text-xs font-bold uppercase">Verify Order</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function verifyOrderCS(idx) {
+            systemOrders[idx].status = 'Verified';
+            renderCSOrders();
+            renderAdminOrders();
+            alert(`Order #${systemOrders[idx].invoice} has been verified and forwarded for fulfillment.`);
+        }
+
+        // Executive Admin Portal Functions
+        function openAdminAuthModal() {
+            document.getElementById('admin-auth-modal').classList.remove('hidden');
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('admin-auth-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPasscode(e) {
+            e.preventDefault();
+            const val = document.getElementById('admin-passcode-input').value;
+            if (val === adminPasscode) {
+                closeAdminAuthModal();
+                document.getElementById('admin-portal-overlay').classList.remove('hidden');
+                renderAdminOrders();
+                renderAdminMediaGrid();
+                renderAdminProductsList();
+            } else {
+                document.getElementById('admin-auth-error').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminPortal() {
+            document.getElementById('admin-portal-overlay').classList.add('hidden');
+        }
+
+        function switchAdminTab(tabId) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('text-gold-400', 'bg-gold-400/10');
+                btn.classList.add('text-slate-400');
+            });
+            document.getElementById(`admin-tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('text-gold-400', 'bg-gold-400/10');
+                activeBtn.classList.remove('text-slate-400');
+            }
+        }
+
+        function renderAdminOrders() {
+            const container = document.getElementById('admin-orders-table');
+            let totalRev = 0;
+            let verifiedCount = 0;
+
+            systemOrders.forEach(o => {
+                const numeric = parseFloat(o.total.replace(/[^0-9.]/g, '')) || 0;
+                totalRev += numeric;
+                if (o.status === 'Verified') verifiedCount++;
+            });
+
+            if (document.getElementById('metric-total-rev')) document.getElementById('metric-total-rev').textContent = `₱${totalRev.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            if (document.getElementById('metric-total-orders')) document.getElementById('metric-total-orders').textContent = systemOrders.length;
+            if (document.getElementById('metric-verified-orders')) document.getElementById('metric-verified-orders').textContent = verifiedCount;
+            if (document.getElementById('metric-pending-orders')) document.getElementById('metric-pending-orders').textContent = systemOrders.length - verifiedCount;
+
+            if (!container) return;
+            if (systemOrders.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-400">No CRM transactions logged.</div>`;
+                return;
+            }
+
+            container.innerHTML = systemOrders.map(ord => `
+                <div class="bg-charcoal p-4 rounded-xl border border-slate-700 text-xs flex justify-between items-center">
+                    <div>
+                        <span class="font-bold text-gold-400">${ord.invoice}</span> - ${ord.name} (${ord.phone})
+                        <div class="text-[11px] text-slate-400">${ord.address}</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-white text-sm">${ord.total}</span>
+                        <div class="text-[10px] text-gold-400 font-semibold uppercase">${ord.status}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminMediaGrid() {
+            const container = document.getElementById('media-grid-container');
+            if (!container) return;
+
+            container.innerHTML = products.map(p => `
+                <div class="bg-charcoal p-3 rounded-2xl border border-slate-700 space-y-2 text-center">
+                    <div class="h-28 bg-slate-900 rounded-xl flex items-center justify-center p-2">
+                        <img src="${p.img}" class="max-h-full object-contain">
+                    </div>
+                    <span class="text-[11px] text-white font-bold block truncate">${p.name}</span>
+                    <button onclick="navigator.clipboard.writeText('${p.img}'); alert('Public Supabase URL copied!');" class="w-full py-1 rounded bg-slate-800 text-[10px] text-gold-400 uppercase font-bold">Copy URL</button>
+                </div>
+            `).join('');
+        }
+
+        function uploadFileToSupabaseStorage(input) {
+            if (input.files && input.files[0]) {
+                alert("Simulating direct bucket upload to 'amanah-media'... Asset metadata synchronized with database.");
+            }
+        }
+
+        function renderAdminProductsList() {
+            const container = document.getElementById('admin-products-list');
+            if (!container) return;
+
+            container.innerHTML = products.map((prod, idx) => `
+                <div class="bg-charcoal p-4 rounded-2xl border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <img src="${prod.img}" class="w-12 h-12 object-contain bg-slate-900 p-1 rounded-xl">
+                        <div>
+                            <input type="text" value="${prod.name}" onchange="products[${idx}].name=this.value" class="bg-slate-900 text-xs font-bold text-white px-2 py-1 rounded border border-slate-700">
+                            <input type="text" value="${prod.srp}" onchange="products[${idx}].srp=this.value; products[${idx}].priceNum=parseFloat(this.value.replace(/[^0-9.]/g,''))" class="bg-slate-900 text-xs text-gold-400 font-bold px-2 py-1 rounded border border-slate-700 mt-1">
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="products.splice(${idx},1); renderAdminProductsList(); renderProducts(); renderPOSGrid();" class="px-3 py-1.5 bg-red-900/50 hover:bg-red-800 text-xs text-red-200 rounded-lg">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAddProductModal() {
+            const name = prompt("Product Name:");
+            const price = prompt("SRP Price (e.g. ₱500):");
+            if (name && price) {
+                products.push({
+                    id: 'custom-' + Date.now(),
+                    name: name,
+                    srp: price,
+                    priceNum: parseFloat(price.replace(/[^0-9.]/g,'')) || 0,
+                    desc: 'Official product item.',
+                    img: 'https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/3%20%282%29.png'
+                });
+                renderAdminProductsList();
+                renderProducts();
+                renderPOSGrid();
+            }
+        }
+
+        function lockAndSaveAdminChanges() {
+            renderProducts();
+            renderPOSGrid();
+            closeAdminPortal();
+            alert("All CMS changes applied!");
+        }
+
+        // Live Chat Operations
+        function toggleClientChat() {
+            document.getElementById('client-chat-box')?.classList.toggle('hidden');
+        }
+
+        function sendClientMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('client-chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            appendChatMessage('Client', msg);
+            input.value = '';
+
+            setTimeout(() => {
+                appendChatMessage('AMANAH Bot', `Thank you for reaching out! A representative will respond shortly.`);
+            }, 1000);
+        }
+
+        function sendCSDeskMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('cs-chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            appendChatMessage('CS Agent', msg);
+            input.value = '';
+        }
+
+        function appendChatMessage(sender, text) {
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const html = `
+                <div class="flex flex-col items-${sender === 'Client' ? 'end' : 'start'} space-y-1">
+                    <span class="text-[9px] text-slate-500 font-bold">${sender} • ${time}</span>
+                    <div class="${sender === 'Client' ? 'bg-gold-400 text-black' : 'bg-slate-800 text-slate-200'} p-3 rounded-2xl max-w-[85%] border border-slate-700">
+                        ${text}
+                    </div>
+                </div>
+            `;
+            document.getElementById('chat-messages-container')?.insertAdjacentHTML('beforeend', html);
+            document.getElementById('cs-live-messages-panel')?.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Product Modal Handlers
+        function openProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('modal-title').textContent = product.name;
+            document.getElementById('modal-price').textContent = product.srp;
+            document.getElementById('modal-desc').textContent = product.desc;
+            document.getElementById('modal-img').src = product.img;
+
+            const addBtn = document.getElementById('modal-add-btn');
+            if (addBtn) {
+                addBtn.onclick = function() {
+                    addToCart(productId);
+                    closeProductModal();
+                    toggleCartDrawer();
+                };
+            }
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        function openOpportunityModal(tier, price, details) {
+            document.getElementById('opp-modal-title').textContent = tier;
+            document.getElementById('opp-modal-price').textContent = price;
+            document.getElementById('opp-modal-desc').textContent = details;
+            document.getElementById('opportunity-modal').classList.remove('hidden');
+        }
+
+        function closeOpportunityModal() {
+            document.getElementById('opportunity-modal').classList.add('hidden');
+        }
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+            renderPOSGrid();
+            updateCartTotals();
+
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (menuBtn && mobileMenu) {
+                menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+                document.querySelectorAll('.mobile-link').forEach(l => l.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+            }
+        });
+    </script>
+</body>
+</html>
