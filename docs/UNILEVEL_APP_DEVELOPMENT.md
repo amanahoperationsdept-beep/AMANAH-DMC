@@ -2,22 +2,30 @@
 
 ## Repository layout
 
-The root repository is now the Next.js application. The previous static `index.html`
-landing page has been removed from this feature branch and replaced by the
-Next.js App Router experience under `src/app`.
+The root repository is the Next.js application. The previous static landing page
+has been replaced on this feature branch by the Next.js App Router experience
+under src/app.
 
-## Current interface increment
+## Current interface and authentication increment
 
-- New AMANAH public landing page and brand styling.
-- Separate Administrator and Distributor sign-in portals.
-- Role-specific dashboard previews and navigation.
-- Responsive desktop and mobile layouts.
-- Supabase Auth and database client libraries included as dependencies.
+- AMANAH public landing page, brand styling, and responsive product catalog.
+- Supabase email/password sign-in action.
+- Server-managed Supabase session cookies refreshed by root middleware.
+- Separate /admin and /distributor routes with server-side active-profile role guards.
+- Sign-out server action.
+- Sample dashboard preview remains illustrative and is not used as authenticated data.
 
-**Authentication is not connected yet.** The login screen is a UI preview only;
-it does not validate credentials or establish a session. Dashboard values and
-activity are sample data. Do not enter real passwords or use these sample figures
-for business decisions.
+Authentication integration code is present, but it has not been connected to or
+tested against the user's live Supabase project. The app requires the project URL,
+anon key, the reviewed database schema, and provisioned profile rows. Only active
+profiles with the matching database role can enter the corresponding workspace.
+Public registration and the application admin-approval workflow are not implemented.
+
+## Authentication setup
+
+See docs/AUTHENTICATION_SETUP.md for environment variables, account provisioning,
+and the controlled development-only first-admin bootstrap. No service-role key
+is used by the sign-in flow.
 
 ## Agreed draft configuration
 
@@ -32,7 +40,7 @@ for business decisions.
 ## Digital stock and payment verification design
 
 The confirmed workflow and authorization policy are documented in
-`docs/DIGITAL_STOCK_PAYMENT_VERIFICATION.md`:
+docs/DIGITAL_STOCK_PAYMENT_VERIFICATION.md:
 
 - Main AMANAH, Branch Operators, and Mobile Stockists may initiate payment
   verification only when they have sufficient available digital stock.
@@ -48,11 +56,11 @@ schema.
 
 ## Database migration sequence
 
-1. `supabase/migrations/0001_initial_schema.sql` — imported initial schema.
-2. `supabase/migrations/0002_secure_monthly_closing.sql` — restricts monthly
+1. supabase/migrations/0001_initial_schema.sql — initial schema.
+2. supabase/migrations/0002_secure_monthly_closing.sql — restricts monthly
    calculation RPCs to service-role execution and adds closing safeguards.
 
-The migrations have **not** been applied to any Supabase project. They must be
+The migrations have not been applied to any Supabase project. They must be
 reviewed and tested together in a disposable development database first.
 
 ## Security baseline
@@ -69,25 +77,23 @@ reviewed and tested together in a disposable development database first.
 
 ## Next implementation priorities
 
-1. Connect Supabase Auth with server-side session handling and role guards.
-2. Implement a safe first-admin bootstrap; never allow public self-registration
-   to grant an admin role.
-3. Add pending distributor approval and sponsor/genealogy validation.
-4. Implement the digital stock, organization hierarchy, stock transfer, and
-   location-scoped finance permission design in `docs/DIGITAL_STOCK_PAYMENT_VERIFICATION.md`.
-5. Add server-side order creation, payment verification, immutable PV snapshots,
+1. Add secure distributor onboarding and admin approval, with a controlled
+   first-admin bootstrap and no public admin self-registration.
+2. Implement the digital stock, organization hierarchy, stock transfer, and
+   location-scoped finance permission design.
+3. Add server-side order creation, payment verification, immutable PV snapshots,
    and refund/reversal handling.
-5. Add an explicit commission approval and idempotent wallet-posting workflow.
-6. Add payout balance reservation, reconciliation, audit events, and automated
+4. Add an explicit commission approval and idempotent wallet-posting workflow.
+5. Add payout balance reservation, reconciliation, audit events, and automated
    database tests.
-7. Replace dashboard sample data with RLS-protected live queries.
-8. Verify all RLS policies and function grants against a real disposable
+6. Replace dashboard sample data with RLS-protected live queries.
+7. Verify all RLS policies and function grants against a real disposable
    Supabase project before production.
 
 ## Validation status
 
-The repository now contains the initial schema and secure monthly-closing
-migration, plus the first UI increment. No live PostgreSQL/Supabase instance is
-connected in this development session. SQL execution, application build,
-authentication integration, and end-to-end tests remain pending. No production
-deployment or payout operation has been performed.
+The repository now contains the Supabase Auth integration code and a GitHub
+Actions validation workflow for lint, TypeScript, and production build checks.
+No live Supabase project is connected. Authentication, SQL execution, and
+end-to-end behavior still require disposable-project integration testing.
+No production deployment, payout, or production data change has been performed.
