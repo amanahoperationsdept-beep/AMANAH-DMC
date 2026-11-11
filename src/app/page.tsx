@@ -80,7 +80,7 @@ export default function Home() {
                 <div className="form-extras"><label className="remember"><input type="checkbox" /> Remember me</label><button type="button" className="text-button" onClick={() => setNotice("Password recovery will be enabled when Supabase Auth is connected.")}>Forgot password?</button></div>
                 <button className="primary-button full-button" type="submit">Sign in <ArrowRight size={17} /></button>
               </form>
-              {notice && <div className="notice"><CircleHelp size={17} />{notice}</div>}
+              {notice && <div className="notice"><CircleHelp size={17} /><span>{notice}</span><button type="button" className="text-button" onClick={() => setScreen("dashboard")}>Open sample dashboard</button></div>}
               <div className="login-help">Need access? <button className="text-button" onClick={() => setNotice("Contact your AMANAH administrator or sponsor to request account access.")}>Request an account</button></div>
               <div className="login-security"><LockKeyhole size={14} /> Your account is protected by secure authentication.</div>
             </div>
