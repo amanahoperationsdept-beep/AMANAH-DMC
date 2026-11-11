@@ -29,6 +29,23 @@ for business decisions.
   They are not approved compensation terms and must be stress-tested and
   reviewed for Philippine direct-selling/MLM compliance before launch.
 
+## Digital stock and payment verification design
+
+The confirmed workflow and authorization policy are documented in
+`docs/DIGITAL_STOCK_PAYMENT_VERIFICATION.md`:
+
+- Main AMANAH, Branch Operators, and Mobile Stockists may initiate payment
+  verification only when they have sufficient available digital stock.
+- Separate, individually authorized finance users at all three operating
+  levels may review and approve/reject within their assigned scope.
+- Initiators cannot approve their own requests.
+- Stock reservation, payment approval, inventory finalization, and PV posting
+  must be secure, auditable, and idempotent.
+
+This is a design specification only. The stock hierarchy, finance permission
+scopes, payment verification, and PV ledger are not implemented in the current
+schema.
+
 ## Database migration sequence
 
 1. `supabase/migrations/0001_initial_schema.sql` — imported initial schema.
@@ -56,7 +73,9 @@ reviewed and tested together in a disposable development database first.
 2. Implement a safe first-admin bootstrap; never allow public self-registration
    to grant an admin role.
 3. Add pending distributor approval and sponsor/genealogy validation.
-4. Add server-side order creation, payment verification, immutable PV snapshots,
+4. Implement the digital stock, organization hierarchy, stock transfer, and
+   location-scoped finance permission design in `docs/DIGITAL_STOCK_PAYMENT_VERIFICATION.md`.
+5. Add server-side order creation, payment verification, immutable PV snapshots,
    and refund/reversal handling.
 5. Add an explicit commission approval and idempotent wallet-posting workflow.
 6. Add payout balance reservation, reconciliation, audit events, and automated
