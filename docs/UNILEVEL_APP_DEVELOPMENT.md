@@ -30,7 +30,9 @@ existing site is not overwritten.
 
 ## Current implementation increment
 
-Migration `0002_secure_monthly_closing.sql`:
+Migration `0002_secure_monthly_closing.sql` is a follow-on migration for the starter schema in the previously generated ZIP. That `0001_initial_schema.sql` has not yet been imported into this repository, so **do not apply migration 0002 to a database yet**. Import and review the complete starter package first.
+
+The migration:
 - restricts monthly volume and commission draft RPCs to the Supabase
   `service_role`;
 - refreshes monthly volume snapshots before building a draft commission run;
