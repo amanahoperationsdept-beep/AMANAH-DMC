@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { signInAction } from "@/app/actions/auth";
 import ProductCatalog from "@/components/ProductCatalog";
 import {
@@ -26,6 +26,21 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState("");
   const [isSigningIn, startTransition] = useTransition();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedPortal = params.get("portal");
+
+    if (requestedPortal === "admin" || requestedPortal === "distributor") {
+      setRole(requestedPortal);
+      setScreen("login");
+    }
+
+    if (params.get("auth") === "not-configured") {
+      setScreen("login");
+      setNotice("Secure sign-in is not configured yet. Add the Supabase project URL and anon key, then try again.");
+    }
+  }, []);
 
   const openLogin = (nextRole: Role) => {
     setRole(nextRole);
