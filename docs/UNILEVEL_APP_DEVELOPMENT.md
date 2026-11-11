@@ -1,10 +1,23 @@
-# Unilevel application — development notes
+# AMANAH Unilevel application — development notes
 
 ## Repository layout
 
-The existing AMANAH-DMC landing page remains at the repository root. The Unilevel
-application is being developed as a separate application area so that the
-existing site is not overwritten.
+The root repository is now the Next.js application. The previous static `index.html`
+landing page has been removed from this feature branch and replaced by the
+Next.js App Router experience under `src/app`.
+
+## Current interface increment
+
+- New AMANAH public landing page and brand styling.
+- Separate Administrator and Distributor sign-in portals.
+- Role-specific dashboard previews and navigation.
+- Responsive desktop and mobile layouts.
+- Supabase Auth and database client libraries included as dependencies.
+
+**Authentication is not connected yet.** The login screen is a UI preview only;
+it does not validate credentials or establish a session. Dashboard values and
+activity are sample data. Do not enter real passwords or use these sample figures
+for business decisions.
 
 ## Agreed draft configuration
 
@@ -12,9 +25,18 @@ existing site is not overwritten.
 - PV conversion: 1 PV = PHP 1.
 - Ten upline generations; differential commissions.
 - Both personal PV and group PV are required for rank qualification.
-- Rank percentages and thresholds in the starter migration are proposals only.
+- Rank percentages and thresholds in the initial migration are proposals only.
   They are not approved compensation terms and must be stress-tested and
   reviewed for Philippine direct-selling/MLM compliance before launch.
+
+## Database migration sequence
+
+1. `supabase/migrations/0001_initial_schema.sql` — imported initial schema.
+2. `supabase/migrations/0002_secure_monthly_closing.sql` — restricts monthly
+   calculation RPCs to service-role execution and adds closing safeguards.
+
+The migrations have **not** been applied to any Supabase project. They must be
+reviewed and tested together in a disposable development database first.
 
 ## Security baseline
 
@@ -28,35 +50,25 @@ existing site is not overwritten.
 - Approved/posted monthly periods must not be recalculated.
 - Real payouts and production database changes require separate explicit approval.
 
-## Current implementation increment
+## Next implementation priorities
 
-Migration `0002_secure_monthly_closing.sql` is a follow-on migration for the starter schema in the previously generated ZIP. That `0001_initial_schema.sql` has not yet been imported into this repository, so **do not apply migration 0002 to a database yet**. Import and review the complete starter package first.
-
-The migration:
-- restricts monthly volume and commission draft RPCs to the Supabase
-  `service_role`;
-- refreshes monthly volume snapshots before building a draft commission run;
-- prevents recalculation of approved or posted periods; and
-- clears stale approval metadata when rebuilding a draft run.
-
-## Known limitations / next work
-
-1. This repository's existing `main` branch is a static landing page. The app
-   foundation must be introduced in a separate directory and must not replace it.
-2. The initial schema still needs a secure first-admin bootstrap and an admin
-   approval workflow for pending distributor profiles.
-3. Add server-side order creation, payment verification, immutable PV snapshots,
+1. Connect Supabase Auth with server-side session handling and role guards.
+2. Implement a safe first-admin bootstrap; never allow public self-registration
+   to grant an admin role.
+3. Add pending distributor approval and sponsor/genealogy validation.
+4. Add server-side order creation, payment verification, immutable PV snapshots,
    and refund/reversal handling.
-4. Add an explicit commission approval and idempotent wallet-posting workflow.
-5. Add payout balance reservation, reconciliation, audit events, and automated
+5. Add an explicit commission approval and idempotent wallet-posting workflow.
+6. Add payout balance reservation, reconciliation, audit events, and automated
    database tests.
-6. Verify all RLS policies and function grants against a real disposable
+7. Replace dashboard sample data with RLS-protected live queries.
+8. Verify all RLS policies and function grants against a real disposable
    Supabase project before production.
-7. The starter SQL has not yet been applied to Supabase. No deployment or payout
-   operation has been performed.
 
 ## Validation status
 
-The migration has been statically reviewed against the starter schema. No live
-PostgreSQL/Supabase instance is connected in this development session, so SQL
-execution and integration tests remain pending.
+The repository now contains the initial schema and secure monthly-closing
+migration, plus the first UI increment. No live PostgreSQL/Supabase instance is
+connected in this development session. SQL execution, application build,
+authentication integration, and end-to-end tests remain pending. No production
+deployment or payout operation has been performed.
