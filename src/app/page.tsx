@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { signInAction } from "@/app/actions/auth";
 import ProductCatalog from "@/components/ProductCatalog";
 import {
   ArrowRight, ArrowUpRight, Award, BarChart3, Bell, CheckCircle2, ChevronDown,
@@ -24,6 +25,7 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState("");
+  const [isSigningIn, startTransition] = useTransition();
 
   const openLogin = (nextRole: Role) => {
     setRole(nextRole);
@@ -34,7 +36,16 @@ export default function Home() {
 
   const submitLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setNotice("This is the interface preview. Connect your Supabase project to activate secure sign-in.");
+    const formData = new FormData(event.currentTarget);
+    formData.set("role", role);
+    setNotice("");
+
+    startTransition(async () => {
+      const result = await signInAction(formData);
+      if (result && "error" in result) {
+        setNotice(result.error);
+      }
+    });
   };
 
   if (screen === "dashboard") {
@@ -71,19 +82,21 @@ export default function Home() {
               </div>
               <div className="portal-label"><span className={role === "admin" ? "admin-dot" : "member-dot"} /> {role === "admin" ? "ADMINISTRATOR PORTAL" : "DISTRIBUTOR PORTAL"}</div>
               <form className="login-form" onSubmit={submitLogin}>
-                <label>{role === "admin" ? "Admin email" : "Email or distributor ID"}</label>
-                <input required value={email} onChange={e => setEmail(e.target.value)} placeholder={role === "admin" ? "admin@amanah.com" : "Enter your email or ID"} />
+                <input type="hidden" name="role" value={role} />
+                <label>{role === "admin" ? "Admin email" : "Distributor email"}</label>
+                <input type="email" name="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} placeholder={role === "admin" ? "admin@amanah.com" : "Enter your email address"} />
                 <label>Password</label>
                 <div className="password-field">
-                  <input required minLength={6} type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter your password" />
+                  <input name="password" autoComplete="current-password" required minLength={6} type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter your password" />
                   <button type="button" aria-label="Toggle password visibility" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
                 </div>
-                <div className="form-extras"><label className="remember"><input type="checkbox" /> Remember me</label><button type="button" className="text-button" onClick={() => setNotice("Password recovery will be enabled when Supabase Auth is connected.")}>Forgot password?</button></div>
-                <button className="primary-button full-button" type="submit">Sign in <ArrowRight size={17} /></button>
+                <div className="form-extras"><label className="remember"><input type="checkbox" /> Remember me</label><button type="button" className="text-button" onClick={() => setNotice("Password recovery is not enabled yet. Contact your AMANAH administrator.")}>Forgot password?</button></div>
+                <button className="primary-button full-button" type="submit" disabled={isSigningIn}>{isSigningIn ? "Signing in..." : "Sign in"} <ArrowRight size={17} /></button>
               </form>
-              {notice && <div className="notice"><CircleHelp size={17} /><span>{notice}</span><button type="button" className="text-button" onClick={() => setScreen("dashboard")}>Open sample dashboard</button></div>}
+              {notice && <div className="notice" role="status" aria-live="polite"><CircleHelp size={17} /><span>{notice}</span></div>}
               <div className="login-help">Need access? <button className="text-button" onClick={() => setNotice("Contact your AMANAH administrator or sponsor to request account access.")}>Request an account</button></div>
-              <div className="login-security"><LockKeyhole size={14} /> Your account is protected by secure authentication.</div>
+              <button type="button" className="text-button" onClick={() => setScreen("dashboard")}>Preview sample dashboard</button>
+              <div className="login-security"><LockKeyhole size={14} /> Sign-in checks your active AMANAH profile and assigned role.</div>
             </div>
           </section>
         </div>
@@ -162,7 +175,7 @@ function Dashboard({ role, onLogout }: { role: Role; onLogout: () => void }) {
     : [{ label: "Overview", icon: LayoutDashboard }, { label: "My network", icon: Network }, { label: "My orders", icon: ShoppingBag }, { label: "Commissions", icon: Coins }, { label: "My wallet", icon: Wallet }, { label: "Rewards", icon: Gift }];
   return (
     <main className="dashboard-shell">
-      <aside className="dash-sidebar"><Brand /><div className="dash-label">WORKSPACE</div><div className="dash-nav">{nav.map(item => <button key={item.label} className={active === item.label ? "active" : ""} onClick={() => setActive(item.label)}><item.icon size={18} />{item.label}</button>)}</div><div className="sidebar-bottom"><div className="support-box"><CircleHelp size={18} /><strong>Need help?</strong><span>Our support team is here for you.</span></div><button className="logout-button" onClick={onLogout}><LogOut size={17} /> Sign out</button></div></aside>
+      <aside className="dash-sidebar"><Brand /><div className="dash-label">WORKSPACE</div><div className="dash-nav">{nav.map(item => <button key={item.label} className={active === item.label ? "active" : ""} onClick={() => setActive(item.label)}><item.icon size={18} />{item.label}</button>)}</div><div className="sidebar-bottom"><div className="support-box"><CircleHelp size={18} /><strong>Need help?</strong><span>Our support team is here for you.</span></div><button className="logout-button" onClick={onLogout}><LogOut size={17} /> Exit preview</button></div></aside>
       <section className="dash-main"><header className="dash-header"><div><span className="section-kicker">{admin ? "ADMINISTRATION" : "MEMBER PORTAL"}</span><h1>{active}</h1></div><div className="dash-user"><button className="notification-button"><Bell size={18} /><i /></button><div className="avatar">{admin ? "AD" : "JD"}</div><div><strong>{admin ? "Administrator" : "Juan Dela Cruz"}</strong><small>{admin ? "System manager" : "Distributor account"}</small></div><ChevronDown size={15} /></div></header>
         {active === "Products" ? <ProductCatalog /> : <>
         <div className="welcome-banner"><div><span>{admin ? "AMANAH OPERATIONS" : "YOUR AMANAH JOURNEY"}</span><h2>{admin ? "Good day, Administrator." : "Welcome back, Juan."}</h2><p>{admin ? "Here is your system activity at a glance." : "Keep building with purpose. Here is your latest performance snapshot."}</p></div><div className="welcome-symbol"><Crown size={48} /></div></div>
