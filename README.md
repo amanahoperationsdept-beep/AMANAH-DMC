@@ -8,6 +8,8 @@ AMANAH is being developed as a responsive network-management platform with separ
 - Supabase email/password sign-in integration.
 - Separate server-guarded Administrator and Distributor workspace routes.
 - Server-side checks for authenticated profile role and active account status.
+- Public distributor application with active sponsor-code validation, generated member codes, and pending status.
+- Email confirmation callback and admin-only approval/rejection queue.
 - A clearly labelled sample dashboard preview; its figures are not live records.
 - Next.js App Router, TypeScript, Tailwind CSS, and Supabase SSR.
 
@@ -25,9 +27,10 @@ AMANAH is being developed as a responsive network-management platform with separ
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SITE_URL` — canonical application origin used for email-confirmation redirects.
 - `SUPABASE_SERVICE_ROLE_KEY` — reserved for future trusted server operations; never expose it to browser code. It is not required for sign-in.
 
-See [Supabase authentication setup](docs/AUTHENTICATION_SETUP.md) for account provisioning and the controlled development-only first-admin bootstrap.
+See [Supabase authentication setup](docs/AUTHENTICATION_SETUP.md) for account provisioning and the controlled development-only first-admin bootstrap. See [distributor onboarding](docs/DISTRIBUTOR_ONBOARDING.md) for sponsor validation, email confirmation, approval, and migration setup.
 
 ## Planned system modules
 
@@ -46,7 +49,7 @@ Commissions must be tied to verified eligible product sales, not recruitment fee
 
 ## Database and deployment status
 
-The initial schema and secure monthly-closing migration have not been applied or integration-tested against the supplied Supabase project. Review and test them together in a disposable development database before any production deployment or payout workflow.
+The initial schema, secure monthly-closing migration, and distributor-onboarding migration have not been applied or integration-tested against the supplied Supabase project. Review and test them together in a disposable development database before any production deployment or payout workflow.
 
 ## Security principles
 
