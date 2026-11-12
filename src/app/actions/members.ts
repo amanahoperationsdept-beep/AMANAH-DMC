@@ -61,13 +61,12 @@ export async function registerDistributorAction(
     return { status: "error", message: "Sign out of your current account before submitting a new distributor application." };
   }
 
-  const { data: sponsorData, error: sponsorError } = await supabase.rpc(
-    "resolve_active_sponsor",
+  const { data: sponsorIsActive, error: sponsorError } = await supabase.rpc(
+    "is_active_distributor_sponsor",
     { p_member_code: sponsorCode },
   );
-  const sponsors = Array.isArray(sponsorData) ? sponsorData : [];
 
-  if (sponsorError || sponsors.length !== 1) {
+  if (sponsorError || sponsorIsActive !== true) {
     return {
       status: "error",
       message: "That sponsor code is not valid for an active distributor. Check the code with your sponsor.",
