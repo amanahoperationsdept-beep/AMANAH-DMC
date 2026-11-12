@@ -13,13 +13,16 @@ under src/app.
 - Server-managed Supabase session cookies refreshed by root middleware.
 - Separate /admin and /distributor routes with server-side active-profile role guards.
 - Sign-out server action.
+- Public distributor application with sponsor-code validation and generated member codes.
+- Supabase Auth confirmation callback; pending accounts are signed out until approved.
+- Admin-only distributor approval/rejection queue with database-enforced review checks and append-only review events.
 - Sample dashboard preview remains illustrative and is not used as authenticated data.
 
 Authentication integration code is present, but it has not been connected to or
 tested against the user's live Supabase project. The app requires the project URL,
 anon key, the reviewed database schema, and provisioned profile rows. Only active
 profiles with the matching database role can enter the corresponding workspace.
-Public registration and the application admin-approval workflow are not implemented.
+Distributor registration and administrator review code are implemented on this branch, but require migration 0003 and disposable-project integration testing before use.
 
 ## Authentication setup
 
@@ -59,6 +62,8 @@ schema.
 1. supabase/migrations/0001_initial_schema.sql — initial schema.
 2. supabase/migrations/0002_secure_monthly_closing.sql — restricts monthly
    calculation RPCs to service-role execution and adds closing safeguards.
+3. supabase/migrations/0003_distributor_onboarding.sql — creates pending distributor
+   profiles from Auth signups and adds database-enforced admin review.
 
 The migrations have not been applied to any Supabase project. They must be
 reviewed and tested together in a disposable development database first.
@@ -77,8 +82,9 @@ reviewed and tested together in a disposable development database first.
 
 ## Next implementation priorities
 
-1. Add secure distributor onboarding and admin approval, with a controlled
-   first-admin bootstrap and no public admin self-registration.
+1. Test distributor signup, email confirmation, sponsor genealogy, and admin
+   approval in a disposable Supabase project; retain a controlled first-admin
+   bootstrap and no public admin self-registration.
 2. Implement the digital stock, organization hierarchy, stock transfer, and
    location-scoped finance permission design.
 3. Add server-side order creation, payment verification, immutable PV snapshots,
@@ -94,6 +100,7 @@ reviewed and tested together in a disposable development database first.
 
 The repository now contains the Supabase Auth integration code and a GitHub
 Actions validation workflow for lint, TypeScript, and production build checks.
-No live Supabase project is connected. Authentication, SQL execution, and
-end-to-end behavior still require disposable-project integration testing.
+No live Supabase project is connected. Authentication, all three migrations,
+email confirmation, sponsor genealogy, and approval behavior still require
+disposable-project integration testing.
 No production deployment, payout, or production data change has been performed.
