@@ -23,20 +23,21 @@ create policy "member review events read own or admin"
 revoke all on table public.member_review_events from anon, authenticated;
 grant select on table public.member_review_events to authenticated;
 
-create or replace function public.resolve_active_sponsor(p_member_code text)
-returns table(member_code text, full_name text)
+create or replace function public.is_active_distributor_sponsor(p_member_code text)
+returns boolean
 language sql stable security definer set search_path = ''
-as $$
-  select p.member_code, p.full_name
-  from public.profiles p
-  where p_member_code is not null
-    and pg_catalog.char_length(pg_catalog.btrim(p_member_code)) between 1 and 32
-    and pg_catalog.upper(p.member_code) = pg_catalog.upper(pg_catalog.btrim(p_member_code))
-    and p.role = 'distributor' and p.status = 'active'
-  limit 1;
-$$;
-revoke all on function public.resolve_active_sponsor(text) from public, anon, authenticated;
-grant execute on function public.resolve_active_sponsor(text) to anon, authenticated;
+as $
+  select exists (
+    select 1
+    from public.profiles p
+    where p_member_code is not null
+      and pg_catalog.char_length(pg_catalog.btrim(p_member_code)) between 1 and 32
+      and pg_catalog.upper(p.member_code) = pg_catalog.upper(pg_catalog.btrim(p_member_code))
+      and p.role = 'distributor' and p.status = 'active'
+  );
+$;
+revoke all on function public.is_active_distributor_sponsor(text) from public, anon, authenticated;
+grant execute on function public.is_active_distributor_sponsor(text) to anon, authenticated;
 
 -- Only marked public distributor signups are handled. Admins provisioned manually
 -- in Supabase Auth are untouched. The client cannot select role/status/member code/sponsor UUID.
@@ -184,8 +185,8 @@ revoke all on function public.review_member_application(uuid, text, text)
 grant execute on function public.review_member_application(uuid, text, text)
   to authenticated;
 
-comment on function public.resolve_active_sponsor(text) is
-  'Returns minimal public details only for an active distributor sponsor code.';
+comment on function public.is_active_distributor_sponsor(text) is
+  'Returns only a boolean for an active distributor sponsor code; no profile details are exposed.';
 comment on function public.handle_amanah_distributor_signup() is
   'Creates a pending distributor profile and genealogy rows from validated Auth metadata.';
 comment on function public.review_member_application(uuid, text, text) is
