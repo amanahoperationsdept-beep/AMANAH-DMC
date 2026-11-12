@@ -57,6 +57,9 @@ export async function signInAction(formData: FormData): Promise<SignInResult | v
     if (profile.status === "pending" && role === "distributor") {
       return { error: "Your email and application are received. Your distributor account is awaiting administrator approval." };
     }
+    if (profile.status === "closed" && role === "distributor") {
+      return { error: "Your distributor application is closed. Contact AMANAH support if you need assistance." };
+    }
     return { error: "This account is not active. Contact an AMANAH administrator." };
   }
 
