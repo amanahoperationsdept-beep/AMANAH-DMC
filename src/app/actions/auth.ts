@@ -45,11 +45,19 @@ export async function signInAction(formData: FormData): Promise<SignInResult | v
     .eq("id", data.user.id)
     .maybeSingle();
 
-  if (profileError || !profile || profile.status !== "active" || profile.role !== role) {
+  if (profileError || !profile || profile.role !== role) {
     await supabase.auth.signOut();
     return {
       error: "This account is not active for the selected portal. Contact an AMANAH administrator.",
     };
+  }
+
+  if (profile.status !== "active") {
+    await supabase.auth.signOut();
+    if (profile.status === "pending" && role === "distributor") {
+      return { error: "Your email and application are received. Your distributor account is awaiting administrator approval." };
+    }
+    return { error: "This account is not active. Contact an AMANAH administrator." };
   }
 
   redirect(role === "admin" ? "/admin" : "/distributor");
