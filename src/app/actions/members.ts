@@ -69,12 +69,28 @@ export async function registerDistributorAction(
     };
   }
 
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!configuredSiteUrl) {
+    return { status: "error", message: "The email-confirmation website URL is not configured. Contact AMANAH support." };
+  }
+
+  let emailRedirectTo: string;
+  try {
+    const siteOrigin = new URL(configuredSiteUrl);
+    const isLocalDevelopment = siteOrigin.hostname === "localhost" || siteOrigin.hostname === "127.0.0.1";
+    if (siteOrigin.protocol !== "https:" && !isLocalDevelopment) {
+      return { status: "error", message: "The email-confirmation website URL must use HTTPS." };
+    }
+    emailRedirectTo = new URL("/auth/callback", siteOrigin).toString();
+  } catch {
+    return { status: "error", message: "The email-confirmation website URL is invalid." };
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: siteUrl + "/auth/callback",
+      emailRedirectTo,
       data: {
         amanah_distributor_signup: true,
         full_name: fullName,
