@@ -12,6 +12,8 @@
 
 Administrator accounts are never created through public registration. The first/root distributor must be provisioned by an administrator using a controlled development procedure.
 
+For a disposable development project, create the root distributor's Auth user manually, then insert a matching active distributor profile and its self-genealogy row in the SQL Editor. Use a unique member code and the exact Auth UUID. Do not use this bootstrap in production without an approved procedure and backup. Subsequent public applications must provide that active distributor's sponsor code.
+
 ## Database migration
 
 Apply the migrations in order in a disposable development Supabase project:
@@ -33,7 +35,7 @@ Email confirmation should remain enabled where possible. The database approval f
 ## Security properties
 
 - The browser never supplies a role, member status, generated member code, or sponsor UUID.
-- Sponsor codes are revalidated inside the Auth trigger while the sponsor row is locked.
+- Sponsor codes are case-insensitively unique and revalidated inside the Auth trigger while the sponsor row is locked.
 - Invalid, inactive, non-distributor, or missing sponsor codes cause the Auth/profile transaction to fail.
 - The Auth trigger only handles users explicitly marked as AMANAH distributor signups; manually provisioned administrators are untouched.
 - Every new distributor begins pending and has no access to protected distributor pages until an administrator approves them.
