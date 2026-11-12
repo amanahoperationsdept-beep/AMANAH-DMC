@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 import { signInAction } from "@/app/actions/auth";
 import ProductCatalog from "@/components/ProductCatalog";
 import {
@@ -39,6 +40,16 @@ export default function Home() {
     if (params.get("auth") === "not-configured") {
       setScreen("login");
       setNotice("Secure sign-in is not configured yet. Add the Supabase project URL and anon key, then try again.");
+    }
+
+    if (params.get("auth") === "pending") {
+      setScreen("login");
+      setNotice("Your email is confirmed. Your distributor application is now waiting for administrator approval.");
+    }
+
+    if (params.get("auth") === "confirmation-failed") {
+      setScreen("login");
+      setNotice("We could not confirm that email link. Request a new confirmation email or contact AMANAH support.");
     }
   }, []);
 
@@ -109,7 +120,7 @@ export default function Home() {
                 <button className="primary-button full-button" type="submit" disabled={isSigningIn}>{isSigningIn ? "Signing in..." : "Sign in"} <ArrowRight size={17} /></button>
               </form>
               {notice && <div className="notice" role="status" aria-live="polite"><CircleHelp size={17} /><span>{notice}</span></div>}
-              <div className="login-help">Need access? <button className="text-button" onClick={() => setNotice("Contact your AMANAH administrator or sponsor to request account access.")}>Request an account</button></div>
+              <div className="login-help">Need access? <Link className="text-button" href="/register">Create a distributor account</Link></div>
               <button type="button" className="text-button" onClick={() => setScreen("dashboard")}>Preview sample dashboard</button>
               <div className="login-security"><LockKeyhole size={14} /> Sign-in checks your active AMANAH profile and assigned role.</div>
             </div>
