@@ -11,6 +11,9 @@ create table public.member_review_events (
   note text check (note is null or char_length(note) <= 1000),
   created_at timestamptz not null default now()
 );
+create unique index profiles_member_code_upper_uidx
+  on public.profiles (pg_catalog.upper(member_code));
+
 create index member_review_events_member_created_idx
   on public.member_review_events(member_id, created_at desc);
 alter table public.member_review_events enable row level security;
@@ -108,6 +111,7 @@ drop trigger if exists on_auth_user_created_amanah_distributor on auth.users;
 create trigger on_auth_user_created_amanah_distributor
   after insert on auth.users
   for each row execute function public.handle_amanah_distributor_signup();
+revoke all on function public.handle_amanah_distributor_signup() from public, anon, authenticated;
 
 -- Retire the older RPC that let an authenticated user choose a member code and sponsor UUID.
 revoke all on function public.register_member(text, text, text, uuid)
