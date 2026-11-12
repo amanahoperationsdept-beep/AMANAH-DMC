@@ -56,6 +56,11 @@ export async function registerDistributorAction(
   }
 
   const supabase = await createSupabaseServerClient();
+  const { data: authData } = await supabase.auth.getUser();
+  if (authData.user) {
+    return { status: "error", message: "Sign out of your current account before submitting a new distributor application." };
+  }
+
   const { data: sponsorData, error: sponsorError } = await supabase.rpc(
     "resolve_active_sponsor",
     { p_member_code: sponsorCode },
