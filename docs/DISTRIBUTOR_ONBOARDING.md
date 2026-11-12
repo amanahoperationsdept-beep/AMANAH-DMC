@@ -22,7 +22,7 @@ Apply the migrations in order in a disposable development Supabase project:
 2. supabase/migrations/0002_secure_monthly_closing.sql
 3. supabase/migrations/0003_distributor_onboarding.sql
 
-Migration 0003 adds an append-only member review event table, minimal sponsor-code lookup, Auth-triggered pending distributor creation, generated member codes, atomic genealogy rows, and an admin-only review function. It also revokes the older client-callable register_member RPC so clients cannot choose a member code or sponsor UUID.
+Migration 0003 adds an append-only member review event table, boolean-only sponsor-code lookup, Auth-triggered pending distributor creation, generated member codes, atomic genealogy rows, and an admin-only review function. It also revokes the older client-callable register_member RPC so clients cannot choose a member code or sponsor UUID.
 
 A rejected application is stored with profile status closed; the review event records the explicit rejected decision. This avoids changing the existing member_status enum in a potentially transaction-sensitive migration.
 
