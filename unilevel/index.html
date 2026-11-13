@@ -127,7 +127,7 @@
     message.textContent = 'Add the new Supabase publishable key in unilevel/config.js, then reload this page.';
     return;
   }
-  client = window.supabase.createClient(cfg.url, cfg.publishableKey);
+  client = window.supabase.createClient(cfg.url, cfg.publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
   status.textContent = 'Supabase configured';
   status.className = 'rounded-full border border-emerald-500/30 px-3 py-1 text-xs text-emerald-300';
 
@@ -137,12 +137,12 @@
 
   document.getElementById('loginForm').addEventListener('submit', async (event) => {
     event.preventDefault(); message.textContent = 'Signing in…';
-    const {error} = await client.auth.signInWithPassword({
+    const {data: signInData, error} = await client.auth.signInWithPassword({
       email: document.getElementById('email').value.trim(),
       password: document.getElementById('password').value
     });
     message.textContent = error ? error.message : '';
-    if (!error) await loadProfile();
+    if (!error && signInData?.user) await loadProfile(signInData.user);
   });
 
   document.getElementById('signupForm').addEventListener('submit', async (event) => {
@@ -163,11 +163,23 @@
     document.getElementById('signupForm').reset();
   });
 
-  async function loadProfile() {
-    const {data: {user}} = await client.auth.getUser();
+  let profileLoadPromise = null;
+  async function loadProfile(user) {
     if (!user) return;
-    const {data: profile, error} = await client.from('profiles').select('member_code,full_name,role,is_active').eq('id', user.id).single();
-    if (error) { message.textContent = 'Signed in, but profile is not ready. Ask an administrator to check the database migration.'; return; }
+    if (profileLoadPromise) return profileLoadPromise;
+    profileLoadPromise = (async () => {
+    const {data: profile, error} = await client.from('profiles')
+      .select('member_code,full_name,role,is_active')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (error) {
+      message.textContent = 'Your login is active, but the member profile could not be read. Please check the profiles table permissions.';
+      return;
+    }
+    if (!profile) {
+      message.textContent = 'Your login is valid, but your AMANAH member profile is missing. Ask the administrator to run the profile repair SQL migration in Supabase, then sign in again.';
+      return;
+    }
     authPanel.classList.add('hide'); memberPanel.classList.remove('hide');
     document.getElementById('memberName').textContent = profile.full_name || user.email;
     document.getElementById('memberRole').textContent = roleNames[profile.role] || profile.role;
@@ -182,6 +194,8 @@
       document.getElementById('distributorDashboard').classList.add('hide');
       document.getElementById('roleModules').classList.remove('hide');
     }
+    })();
+    try { await profileLoadPromise; } finally { profileLoadPromise = null; }
   }
 
   document.getElementById('openProductCatalog').addEventListener('click', async () => {
@@ -249,8 +263,26 @@
   document.getElementById('signOut').addEventListener('click', async () => {
     await client.auth.signOut(); memberPanel.classList.add('hide'); authPanel.classList.remove('hide');
   });
-  client.auth.onAuthStateChange((_event, session) => { if (session) setTimeout(loadProfile, 0); });
-  loadProfile();
+  client.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) setTimeout(() => loadProfile(session.user), 0);
+    if (event === 'SIGNED_OUT') {
+      memberPanel.classList.add('hide');
+      authPanel.classList.remove('hide');
+      document.getElementById('distributorDashboard').classList.add('hide');
+    }
+  });
+
+  async function initializeAuth() {
+    const {data, error} = await client.auth.getSession();
+    if (error) {
+      // Remove only this browser's stale local session; never delete the Auth account.
+      await client.auth.signOut({scope: 'local'});
+      message.textContent = 'Your saved sign-in session expired or could not refresh. Please sign in again.';
+      return;
+    }
+    if (data?.session?.user) await loadProfile(data.session.user);
+  }
+  initializeAuth();
 })();
 </script>
 </body>
