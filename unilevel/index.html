@@ -102,6 +102,14 @@
           </div>
           <p id="homeDataMessage" role="status" class="text-xs muted">Loading your account summary…</p>
         </section>
+        <section id="adminDashboard" class="hide mt-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div><p class="text-xs uppercase tracking-widest text-emerald-300">Administrator workspace</p><h3 class="mt-1 text-xl font-extrabold">Submitted orders</h3><p class="mt-1 text-xs muted">Recent member orders · view only</p></div>
+            <button id="refreshAdminOrders" type="button" class="rounded-lg border border-yellow-500/30 px-3 py-2 text-xs font-bold">Refresh orders</button>
+          </div>
+          <p id="adminOrdersMessage" role="status" class="text-xs muted">Loading orders…</p>
+          <div id="adminOrdersList" class="space-y-3"></div>
+        </section>
       </div>
     </section>
   </main>
@@ -193,12 +201,17 @@
     document.getElementById('memberCode').textContent = profile.member_code || 'Pending';
     document.getElementById('memberStatus').textContent = profile.is_active ? 'Active' : 'Inactive';
     document.getElementById('roleModules').innerHTML = (moduleMap[profile.role] || []).map(x => '<div class="rounded-lg border border-white/10 bg-black/20 px-3 py-3 text-sm">' + x + '</div>').join('');
+    document.getElementById('adminDashboard').classList.add('hide');
+    document.getElementById('distributorDashboard').classList.add('hide');
     if (profile.role === 'distributor') {
       document.getElementById('roleModules').classList.add('hide');
       document.getElementById('distributorDashboard').classList.remove('hide');
       await loadDistributorHome(user.id);
+    } else if (profile.role === 'administrator') {
+      document.getElementById('roleModules').classList.add('hide');
+      document.getElementById('adminDashboard').classList.remove('hide');
+      await loadAdminOrders();
     } else {
-      document.getElementById('distributorDashboard').classList.add('hide');
       document.getElementById('roleModules').classList.remove('hide');
     }
     })();
@@ -355,6 +368,38 @@
     note.textContent = errors.length
       ? 'Some summary figures could not be loaded. Check the table permissions and try again.'
       : 'Summary loaded from your AMANAH Unilevel account. Commission figure is the total of recorded commission entries, not necessarily withdrawable balance.';
+  }
+
+  document.getElementById('refreshAdminOrders').addEventListener('click', loadAdminOrders);
+
+  async function loadAdminOrders() {
+    const note = document.getElementById('adminOrdersMessage');
+    const list = document.getElementById('adminOrdersList');
+    note.textContent = 'Loading recent orders…';
+    list.innerHTML = '';
+    const {data, error} = await client.rpc('admin_list_orders', {p_limit: 50});
+    if (error) {
+      note.textContent = 'Orders could not be loaded: ' + (error.message || 'Please check the admin orders SQL migration.');
+      return;
+    }
+    const orders = Array.isArray(data) ? data : [];
+    if (!orders.length) {
+      note.textContent = 'No submitted orders found yet.';
+      return;
+    }
+    const esc = value => safeCartText(value);
+    list.innerHTML = orders.map(order => {
+      const items = Array.isArray(order.items) ? order.items : [];
+      const itemHtml = items.map(item => '<div class="flex justify-between gap-3 text-xs"><span class="min-w-0">' + esc(item.product_name || 'Product') + ' × ' + Number(item.quantity || 0) + '</span><span class="shrink-0">' + formatMoney(item.line_total) + '</span></div>').join('');
+      const when = order.created_at ? new Date(order.created_at).toLocaleString('en-PH') : 'Date unavailable';
+      return '<article class="rounded-xl border border-yellow-500/20 bg-black/20 p-4">' +
+        '<div class="flex flex-wrap items-start justify-between gap-2"><div><p class="font-bold text-yellow-300">' + esc(order.order_number || 'Order') + '</p><p class="mt-1 text-xs muted">' + esc(order.member_name) + ' · ' + esc(order.member_code || 'No member code') + '</p><p class="mt-1 text-[11px] muted">' + esc(when) + '</p></div>' +
+        '<span class="rounded-full border border-emerald-500/30 px-2 py-1 text-[11px] text-emerald-300">' + esc(order.status || 'Submitted') + '</span></div>' +
+        '<div class="mt-3 space-y-2 border-t border-white/10 pt-3">' + itemHtml + '</div>' +
+        '<div class="mt-3 flex items-center justify-between border-t border-white/10 pt-3"><span class="text-xs muted">Order total</span><strong class="text-lg text-yellow-300">' + formatMoney(order.total) + '</strong></div>' +
+        '<p class="mt-2 text-[11px] muted">Payment: ' + esc(order.payment_method || 'Not recorded') + '</p></article>';
+    }).join('');
+    note.textContent = orders.length + ' recent order(s) loaded. This screen is read-only; order approval and payment handling are not enabled yet.';
   }
 
   document.getElementById('signOut').addEventListener('click', async () => {
