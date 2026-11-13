@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080b09">
+  <title>AMANAH Unilevel | Member Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <style>
+    :root{color-scheme:dark}body{background:#080b09;color:#f5f5ef;font-family:Inter,system-ui,sans-serif}
+    .panel{background:#111913;border:1px solid rgba(212,175,55,.2);box-shadow:0 18px 60px #0006}
+    .gold{background:linear-gradient(110deg,#f4df91,#d4af37);color:#10140f}
+    input,select{background:#090e0b!important;border:1px solid #344238!important;color:#fff!important}
+    .muted{color:#9ba99f}.hide{display:none!important}
+  </style>
+</head>
+<body class="min-h-screen">
+  <header class="border-b border-yellow-500/15 px-5 py-4">
+    <div class="mx-auto flex max-w-7xl items-center justify-between">
+      <div><div class="font-black tracking-[.22em] text-xl">AMANAH</div><div class="text-[10px] uppercase tracking-[.2em] text-yellow-400">Unilevel Management System</div></div>
+      <span id="connection" class="rounded-full border border-emerald-500/30 px-3 py-1 text-xs text-emerald-300">Checking connection…</span>
+    </div>
+  </header>
+  <main class="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[1.1fr_.9fr]">
+    <section class="flex flex-col justify-center">
+      <p class="mb-3 text-xs font-bold uppercase tracking-[.25em] text-emerald-400">Distribution · Marketing · Member Services</p>
+      <h1 class="max-w-2xl text-4xl font-black leading-tight sm:text-6xl">One network.<br><span class="text-yellow-400">One unilevel</span> system.</h1>
+      <p class="mt-5 max-w-xl leading-7 muted">A dedicated workspace for AMANAH members, orders, inventory, referrals and commission records. Access is controlled by your assigned account role.</p>
+      <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div class="panel rounded-xl p-4"><div class="text-sm font-bold">Administrator</div><div class="mt-1 text-xs muted">System oversight</div></div>
+        <div class="panel rounded-xl p-4"><div class="text-sm font-bold">Marketing Officer</div><div class="mt-1 text-xs muted">Team and sales</div></div>
+        <div class="panel rounded-xl p-4"><div class="text-sm font-bold">Branch Operator</div><div class="mt-1 text-xs muted">Branch operations</div></div>
+        <div class="panel rounded-xl p-4"><div class="text-sm font-bold">Mobile Stockist</div><div class="mt-1 text-xs muted">Stock and orders</div></div>
+        <div class="panel rounded-xl p-4"><div class="text-sm font-bold">Distributor</div><div class="mt-1 text-xs muted">Personal business</div></div>
+      </div>
+      <p class="mt-8 text-xs muted">Separate application · Separate Supabase project · Existing corporate website remains unchanged.</p>
+    </section>
+
+    <section class="panel rounded-3xl p-6 sm:p-8">
+      <div id="authPanel">
+        <div class="mb-6"><h2 class="text-2xl font-extrabold">Member access</h2><p class="mt-1 text-sm muted">Sign in to your AMANAH account.</p></div>
+        <form id="loginForm" class="space-y-4">
+          <label class="block text-sm">Email address<input id="email" type="email" required autocomplete="username" class="mt-2 w-full rounded-xl px-4 py-3"></label>
+          <label class="block text-sm">Password<input id="password" type="password" required autocomplete="current-password" class="mt-2 w-full rounded-xl px-4 py-3"></label>
+          <button class="gold w-full rounded-xl px-4 py-3 font-extrabold" type="submit">Sign in</button>
+        </form>
+        <div class="my-5 border-t border-white/10"></div>
+        <button id="showSignup" class="w-full rounded-xl border border-white/15 px-4 py-3 text-sm font-bold">Create a new distributor account</button>
+        <form id="signupForm" class="hide mt-5 space-y-3">
+          <input id="newName" required placeholder="Full name" class="w-full rounded-xl px-4 py-3">
+          <input id="newPhone" placeholder="Mobile number" class="w-full rounded-xl px-4 py-3">
+          <input id="newEmail" type="email" required placeholder="Email address" class="w-full rounded-xl px-4 py-3">
+          <input id="newPassword" type="password" minlength="8" required placeholder="Password (at least 8 characters)" class="w-full rounded-xl px-4 py-3">
+          <input id="sponsorCode" placeholder="Sponsor member code (optional)" class="w-full rounded-xl px-4 py-3">
+          <button class="gold w-full rounded-xl px-4 py-3 font-extrabold" type="submit">Register distributor</button>
+          <p class="text-xs muted">New registrations receive the Distributor role. An administrator must assign any higher role.</p>
+        </form>
+        <p id="authMessage" role="status" class="mt-4 text-sm text-amber-300"></p>
+      </div>
+
+      <div id="memberPanel" class="hide">
+        <div class="flex items-start justify-between gap-3"><div><p class="text-xs uppercase tracking-widest text-emerald-300">Signed in</p><h2 id="memberName" class="mt-1 text-2xl font-extrabold">Member</h2><p id="memberRole" class="mt-1 text-sm text-yellow-300"></p></div><button id="signOut" class="rounded-lg border border-white/15 px-3 py-2 text-xs">Sign out</button></div>
+        <div class="mt-6 grid grid-cols-2 gap-3">
+          <div class="rounded-xl bg-black/30 p-4"><div class="text-xs muted">Member code</div><div id="memberCode" class="mt-2 font-bold">—</div></div>
+          <div class="rounded-xl bg-black/30 p-4"><div class="text-xs muted">Account status</div><div id="memberStatus" class="mt-2 font-bold text-emerald-300">Active</div></div>
+        </div>
+        <div class="mt-6 rounded-xl border border-yellow-500/20 p-4"><h3 class="font-bold">Portal access</h3><p class="mt-2 text-sm leading-6 muted">Your role is authenticated. Dashboard modules will be enabled as their secure workflows are implemented and tested.</p></div>
+        <div id="roleModules" class="mt-4 grid gap-2 sm:grid-cols-2"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="border-t border-white/10 px-5 py-6 text-center text-xs muted">AMANAH DMC · Unilevel System · Secure member access</footer>
+
+<script>
+(() => {
+  const cfg = window.AMANAH_SUPABASE_CONFIG || {};
+  const status = document.getElementById('connection');
+  const authPanel = document.getElementById('authPanel');
+  const memberPanel = document.getElementById('memberPanel');
+  const message = document.getElementById('authMessage');
+  const roleNames = {
+    administrator: 'Administrator', marketing_officer: 'Marketing Officer',
+    branch_operator: 'Branch Operator', mobile_stockist: 'Mobile Stockist',
+    distributor: 'Distributor'
+  };
+  const moduleMap = {
+    administrator: ['Member directory','Products and pricing','Orders and sales','Commission rules','Withdrawals','Reports and settings'],
+    marketing_officer: ['Team overview','Member referrals','Branch orders','Sales performance','Commission history'],
+    branch_operator: ['Branch POS','Stock inventory','Mobile stockist orders','Distributor orders'],
+    mobile_stockist: ['Mobile POS','Stock inventory','Branch reorders','Customer orders'],
+    distributor: ['Product catalog','Place an order','My referrals','My commissions','My wallet']
+  };
+  let client = null;
+
+  if (!window.supabase || !cfg.url || !cfg.publishableKey || cfg.publishableKey.includes('PASTE_')) {
+    status.textContent = 'Configuration needed';
+    status.className = 'rounded-full border border-amber-500/30 px-3 py-1 text-xs text-amber-300';
+    message.textContent = 'Add the new Supabase publishable key in unilevel/config.js, then reload this page.';
+    return;
+  }
+  client = window.supabase.createClient(cfg.url, cfg.publishableKey);
+  status.textContent = 'Supabase configured';
+  status.className = 'rounded-full border border-emerald-500/30 px-3 py-1 text-xs text-emerald-300';
+
+  document.getElementById('showSignup').addEventListener('click', () => {
+    document.getElementById('signupForm').classList.toggle('hide');
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', async (event) => {
+    event.preventDefault(); message.textContent = 'Signing in…';
+    const {error} = await client.auth.signInWithPassword({
+      email: document.getElementById('email').value.trim(),
+      password: document.getElementById('password').value
+    });
+    message.textContent = error ? error.message : '';
+    if (!error) await loadProfile();
+  });
+
+  document.getElementById('signupForm').addEventListener('submit', async (event) => {
+    event.preventDefault(); message.textContent = 'Creating account…';
+    const fullName = document.getElementById('newName').value.trim();
+    const phone = document.getElementById('newPhone').value.trim();
+    const sponsorCode = document.getElementById('sponsorCode').value.trim();
+    let sponsorId = null;
+    if (sponsorCode) {
+      const {data: sponsor, error: sponsorError} = await client.from('profiles').select('id').eq('member_code', sponsorCode).maybeSingle();
+      if (sponsorError || !sponsor) { message.textContent = 'Sponsor code not found. Check the code or leave it blank.'; return; }
+      sponsorId = sponsor.id;
+    }
+    const {error} = await client.auth.signUp({
+      email: document.getElementById('newEmail').value.trim(),
+      password: document.getElementById('newPassword').value,
+      options: {data: {full_name: fullName, phone, sponsor_id: sponsorId}}
+    });
+    message.textContent = error ? error.message : 'Registration submitted. Check your email if confirmation is enabled. Your default role is Distributor.';
+    document.getElementById('signupForm').reset();
+  });
+
+  async function loadProfile() {
+    const {data: {user}} = await client.auth.getUser();
+    if (!user) return;
+    const {data: profile, error} = await client.from('profiles').select('member_code,full_name,role,is_active').eq('id', user.id).single();
+    if (error) { message.textContent = 'Signed in, but profile is not ready. Ask an administrator to check the database migration.'; return; }
+    authPanel.classList.add('hide'); memberPanel.classList.remove('hide');
+    document.getElementById('memberName').textContent = profile.full_name || user.email;
+    document.getElementById('memberRole').textContent = roleNames[profile.role] || profile.role;
+    document.getElementById('memberCode').textContent = profile.member_code || 'Pending';
+    document.getElementById('memberStatus').textContent = profile.is_active ? 'Active' : 'Inactive';
+    document.getElementById('roleModules').innerHTML = (moduleMap[profile.role] || []).map(x => '<div class="rounded-lg border border-white/10 bg-black/20 px-3 py-3 text-sm">' + x + '</div>').join('');
+  }
+
+  document.getElementById('signOut').addEventListener('click', async () => {
+    await client.auth.signOut(); memberPanel.classList.add('hide'); authPanel.classList.remove('hide');
+  });
+  client.auth.onAuthStateChange((_event, session) => { if (session) setTimeout(loadProfile, 0); });
+  loadProfile();
+})();
+</script>
+</body>
+</html>
