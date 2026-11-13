@@ -198,7 +198,7 @@
     note.textContent = 'Loading official product prices…';
     list.innerHTML = '';
     const {data, error} = await client.from('products')
-      .select('id,name,description,srp,distributor_price')
+      .select('id,name,description,srp,distributor_price,image_path')
       .eq('is_active', true)
       .order('name');
     if (error) {
@@ -212,12 +212,15 @@
     const money = value => '₱' + Number(value || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     list.innerHTML = data.map(product => `
-      <article class="rounded-xl border border-white/10 bg-black/20 p-4">
+      <article class="overflow-hidden rounded-xl border border-white/10 bg-black/20">
+        ${product.image_path && /^https:\/\/bqgxvnrgjmngezknqhsl\\.supabase\\.co\//i.test(product.image_path) ? `<img src="${safe(product.image_path)}" alt="${safe(product.name)}" loading="lazy" class="h-48 w-full bg-white object-contain p-2" onerror="this.style.display='none'">` : ''}
+        <div class="p-4">
         <p class="text-sm font-bold">${safe(product.name)}</p>
         <p class="mt-2 text-xs muted">SRP: <span class="line-through">${money(product.srp)}</span></p>
         <p class="mt-1 text-xs uppercase tracking-wider text-emerald-300">Your Distributor price</p>
         <p class="mt-1 text-2xl font-black text-yellow-300">${money(product.distributor_price)}</p>
         ${product.description ? `<p class="mt-2 text-xs muted">${safe(product.description)}</p>` : ''}
+        </div>
       </article>`).join('');
     note.textContent = data.length + ' active products. Distributor prices are displayed for your signed-in role.';
   }
