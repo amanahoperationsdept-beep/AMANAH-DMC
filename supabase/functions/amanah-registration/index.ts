@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       const { data: existingPhone } = await admin.auth.admin.listUsers({ page: 1, perPage: 1 });
       void existingPhone;
       const { data: created, error: createError } = await admin.auth.admin.createUser({
-        phone, password, phone_confirm: true,
+        phone, password, phone_confirm: false,
         user_metadata: { full_name: fullName, phone, username, sponsor_code: sponsorCode || null },
       });
       if (createError || !created.user) return json({ error: createError?.message || "Could not create account." }, 400);
