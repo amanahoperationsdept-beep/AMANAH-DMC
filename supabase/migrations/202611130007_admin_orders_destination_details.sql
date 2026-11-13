@@ -38,6 +38,7 @@ begin
         'destination_contact_person', o.destination_contact_person,
         'destination_contact_number', o.destination_contact_number,
         'destination_address', o.destination_address,
+        'destination_member_id', o.destination_member_id,
         'items', (
           select coalesce(jsonb_agg(jsonb_build_object(
             'product_name', pr.name,
