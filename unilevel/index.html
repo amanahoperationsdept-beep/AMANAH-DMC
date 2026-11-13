@@ -40,7 +40,22 @@
     body.member-mode #distributorDashboard,body.member-mode #adminDashboard{width:100%;max-width:none}
     body.member-mode #distributorDashboard>div,body.member-mode #adminDashboard>div{min-width:0}
     body.member-mode #amanah-products,body.member-mode #our-community{display:none!important}
-    @media(max-width:640px){body.member-mode #memberPanel{padding:14px}body.member-mode #memberPanel .grid{min-width:0}}
+    /* AMANAH green / gold / gray / black dashboard palette */
+    body.member-mode #memberPanel{background:radial-gradient(ellipse at 12% 0%,rgba(20,100,62,.22),transparent 38%),linear-gradient(135deg,#080b09 0%,#111713 52%,#202722 100%);color:#fff}
+    body.member-mode #memberPanel h2,body.member-mode #memberPanel h3,body.member-mode #memberPanel h4,body.member-mode #memberPanel h5,body.member-mode #memberPanel label{color:#f4f5ef}
+    body.member-mode #memberPanel p,body.member-mode #memberPanel span,body.member-mode #memberPanel div{ text-shadow:none }
+    body.member-mode #memberPanel .muted{color:#c0c9c1!important}
+    body.member-mode #memberPanel .text-xs,body.member-mode #memberPanel .text-sm{line-height:1.55}
+    body.member-mode #memberPanel input,body.member-mode #memberPanel select,body.member-mode #memberPanel textarea{color:#fff!important;background:#151c17!important;border-color:#68766c!important}
+    body.member-mode #memberPanel input::placeholder,body.member-mode #memberPanel textarea::placeholder{color:#b7c1b9!important;opacity:1}
+    body.member-mode #memberPanel button:not(.gold){color:#f5f6ef}
+    .dashboard-nav{position:sticky;top:0;z-index:30;background:linear-gradient(100deg,#0b1710 0%,#1b3023 55%,#242a26 100%);box-shadow:0 8px 24px rgba(0,0,0,.28)}
+    .dashboard-tab{min-height:42px;padding:9px 16px;border:1px solid rgba(215,185,91,.38);border-radius:999px;background:linear-gradient(120deg,#303a33,#171e19);color:#f7f4e8!important;font-size:13px;font-weight:750;white-space:nowrap}
+    .dashboard-tab:hover,.dashboard-tab:focus-visible{border-color:#e2c36b;background:linear-gradient(120deg,#28563a,#3d493f);outline:2px solid #d9b85c;outline-offset:2px}
+    .dashboard-tab.is-active{background:linear-gradient(110deg,#dfc36f,#b18a35);color:#101710!important;border-color:#f0d889}
+    body.member-mode #memberPanel .rounded-xl.border,body.member-mode #memberPanel .rounded-lg.border{border-color:rgba(205,179,95,.32)}
+    @media(max-width:640px){body.member-mode #memberPanel{padding:12px}body.member-mode #memberPanel .grid{min-width:0}.dashboard-nav{gap:7px}.dashboard-tab{padding:8px 12px;font-size:12px;flex:1 1 auto}}
+    @media(max-height:600px) and (min-width:700px){body.member-mode #memberPanel>div:first-child{position:relative}}
   </style>
 </head>
 <body class="min-h-screen">
@@ -95,6 +110,13 @@
 
       <div id="memberPanel" class="hide">
         <div class="flex items-start justify-between gap-3"><div><p class="text-xs uppercase tracking-widest text-emerald-300">Signed in</p><h2 id="memberName" class="mt-1 text-2xl font-extrabold">Member</h2><p id="memberRole" class="mt-1 text-sm text-yellow-300"></p></div><button id="signOut" class="rounded-lg border border-white/15 px-3 py-2 text-xs">Sign out</button></div>
+        <nav id="dashboardNav" aria-label="Dashboard sections" class="dashboard-nav mt-5 flex flex-wrap gap-2 rounded-2xl border border-emerald-500/20 p-3">
+          <button type="button" data-dash-nav="overview" class="dashboard-tab is-active">Overview</button>
+          <button type="button" data-dash-nav="products" class="dashboard-tab">Products &amp; Orders</button>
+          <button type="button" data-dash-nav="referrals" class="dashboard-tab" id="navReferrals">My Referrals</button>
+          <button type="button" data-dash-nav="history" class="dashboard-tab" id="navHistory">Order History</button>
+          <button type="button" data-dash-nav="admin-orders" class="dashboard-tab hide" id="navAdminOrders">Submitted Orders</button>
+        </nav>
         <div class="mt-6 grid grid-cols-2 gap-3">
           <div class="rounded-xl bg-black/30 p-4"><div class="text-xs muted">Member code</div><div id="memberCode" class="mt-2 font-bold">—</div></div>
           <div class="rounded-xl bg-black/30 p-4"><div class="text-xs muted">Account status</div><div id="memberStatus" class="mt-2 font-bold text-emerald-300">Active</div></div>
@@ -112,7 +134,7 @@
             <div class="rounded-xl border border-white/10 bg-black/20 p-4"><p class="text-xs muted">Direct referrals</p><p id="homeReferrals" class="mt-2 text-2xl font-black">—</p></div>
             <div class="rounded-xl border border-white/10 bg-black/20 p-4"><p class="text-xs muted">Recorded commissions</p><p id="homeCommissions" class="mt-2 text-2xl font-black">₱—</p></div>
           </div>
-          <div class="rounded-xl border border-yellow-500/20 p-4">
+          <div id="dashboardProductsSection" class="rounded-xl border border-yellow-500/20 p-4">
             <h4 class="font-bold">Distributor tools</h4>
             <div class="mt-3 grid gap-2 sm:grid-cols-2">
               <button id="openProductCatalog" type="button" class="rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-3 text-left text-sm font-semibold">Product catalog <span class="block text-xs font-normal muted">View Distributor prices</span></button>
@@ -163,11 +185,11 @@
           </div>
           <p id="homeDataMessage" role="status" class="text-xs muted">Loading your account summary…</p>
           <div class="grid gap-4 sm:grid-cols-2">
-            <section class="rounded-xl border border-white/10 bg-black/20 p-4">
+            <section id="dashboardReferralsSection" class="rounded-xl border border-white/10 bg-black/20 p-4">
               <div class="flex items-center justify-between gap-2"><h4 class="font-bold">My Direct Referrals</h4><span id="referralListCount" class="text-xs muted">—</span></div>
               <div id="myReferralList" class="mt-3 space-y-2"><p class="text-xs muted">Loading referrals…</p></div>
             </section>
-            <section class="rounded-xl border border-white/10 bg-black/20 p-4">
+            <section id="dashboardHistorySection" class="rounded-xl border border-white/10 bg-black/20 p-4">
               <div class="flex items-center justify-between gap-2"><h4 class="font-bold">My Recent Orders</h4><span id="recentOrderCount" class="text-xs muted">—</span></div>
               <div id="myRecentOrders" class="mt-3 space-y-2"><p class="text-xs muted">Loading orders…</p></div>
             </section>
@@ -292,6 +314,10 @@
     document.getElementById('roleModules').innerHTML = (moduleMap[profile.role] || []).map(x => '<div class="rounded-lg border border-white/10 bg-black/20 px-3 py-3 text-sm">' + x + '</div>').join('');
     document.getElementById('adminDashboard').classList.add('hide');
     document.getElementById('distributorDashboard').classList.add('hide');
+    document.getElementById('dashboardNav').classList.remove('hide');
+    document.getElementById('navReferrals').classList.toggle('hide',profile.role !== 'distributor');
+    document.getElementById('navHistory').classList.toggle('hide',profile.role !== 'distributor');
+    document.getElementById('navAdminOrders').classList.toggle('hide',profile.role !== 'administrator');
     if (profile.role === 'distributor') {
       document.getElementById('roleModules').classList.add('hide');
       document.getElementById('distributorDashboard').classList.remove('hide');
@@ -306,6 +332,33 @@
     })();
     try { await profileLoadPromise; } finally { profileLoadPromise = null; }
   }
+
+  const dashboardNav = document.getElementById('dashboardNav');
+  function showDashboardSection(section) {
+    const targets = {
+      overview: document.getElementById('distributorDashboard'),
+      products: document.getElementById('dashboardProductsSection'),
+      referrals: document.getElementById('dashboardReferralsSection'),
+      history: document.getElementById('dashboardHistorySection'),
+      'admin-orders': document.getElementById('adminDashboard')
+    };
+    if (section === 'products') {
+      document.getElementById('distributorCatalog').classList.remove('hide');
+      loadDistributorCatalog();
+    }
+    if (section === 'overview') {
+      document.getElementById('distributorCatalog').classList.add('hide');
+    }
+    const target = targets[section];
+    if (target) target.scrollIntoView({behavior:'smooth',block:'start'});
+    dashboardNav.querySelectorAll('[data-dash-nav]').forEach(button => {
+      button.classList.toggle('is-active',button.dataset.dashNav === section);
+    });
+  }
+  dashboardNav.addEventListener('click', event => {
+    const button = event.target.closest('[data-dash-nav]');
+    if (button && !button.classList.contains('hide')) showDashboardSection(button.dataset.dashNav);
+  });
 
   document.getElementById('openProductCatalog').addEventListener('click', async () => {
     document.getElementById('distributorCatalog').classList.remove('hide');
@@ -566,7 +619,7 @@
   }
 
   document.getElementById('signOut').addEventListener('click', async () => {
-    await client.auth.signOut(); document.body.classList.remove('member-mode'); memberPanel.classList.add('hide'); authPanel.classList.remove('hide');
+    await client.auth.signOut(); document.body.classList.remove('member-mode'); memberPanel.classList.add('hide'); authPanel.classList.remove('hide'); document.getElementById('dashboardNav').classList.add('hide');
   });
   client.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session?.user) setTimeout(() => loadProfile(session.user), 0);
@@ -574,6 +627,7 @@
       document.body.classList.remove('member-mode');
       memberPanel.classList.add('hide');
       authPanel.classList.remove('hide');
+      document.getElementById('dashboardNav').classList.add('hide');
       document.getElementById('distributorDashboard').classList.add('hide');
     }
   });
