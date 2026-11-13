@@ -194,21 +194,33 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $
+declare
+  v_sponsor_id uuid;
+  v_sponsor_code text;
 begin
-  insert into public.profiles (id, full_name, phone, member_code, role)
+  v_sponsor_code := nullif(trim(new.raw_user_meta_data ->> 'sponsor_code'), '');
+  if v_sponsor_code is not null then
+    select id into v_sponsor_id
+    from public.profiles
+    where member_code = v_sponsor_code and is_active = true
+    limit 1;
+  end if;
+
+  insert into public.profiles (id, full_name, phone, member_code, role, sponsor_id)
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
     new.raw_user_meta_data ->> 'phone',
     'AM-' || upper(substr(replace(new.id::text, '-', ''), 1, 8)),
-    'distributor'
+    'distributor',
+    v_sponsor_id
   )
   on conflict (id) do nothing;
   insert into public.wallets(member_id) values(new.id) on conflict do nothing;
   return new;
 end;
-$$;
+$;
 
 drop trigger if exists on_auth_user_created_amanah on auth.users;
 create trigger on_auth_user_created_amanah
