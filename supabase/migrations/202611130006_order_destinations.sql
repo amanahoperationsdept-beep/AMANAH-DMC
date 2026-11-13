@@ -70,7 +70,7 @@ begin
   if v_role <> 'distributor'::public.amanah_role then
     raise exception 'Only Distributor accounts can use this order form.';
   end if;
-  if p_destination_category not in ('main_branch','branch_operator','mobile_stockist') then
+  if p_destination_category is null or p_destination_category not in ('main_branch','branch_operator','mobile_stockist') then
     raise exception 'Please select a valid order destination.';
   end if;
 
