@@ -27,6 +27,20 @@
     #memberPanel .panel{background:#111913;border-color:rgba(212,175,55,.2)}
     #memberPanel .soft-card,#memberPanel .product-tile{background:#111913;border-color:rgba(255,255,255,.1)}
     #memberPanel .gold{color:#10140f}
+    /* Full-viewport member workspace after login */
+    body.member-mode{height:100vh;min-height:100vh;overflow:hidden;background:#080d09}
+    body.member-mode>header,body.member-mode>footer{display:none!important}
+    body.member-mode>main{width:100%;max-width:none;height:100vh;min-height:0;margin:0;padding:0;overflow:hidden}
+    body.member-mode #landingTop{display:block;height:100%;padding:0}
+    body.member-mode #landingTop>section:first-child{display:none}
+    body.member-mode #member-access{display:block;width:100%;height:100%;min-height:0;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;overflow:auto}
+    body.member-mode #member-access>.mb-6,body.member-mode #authPanel{display:none!important}
+    body.member-mode #memberPanel{display:block!important;min-height:100%;padding:clamp(16px,2.5vw,36px);overflow:auto}
+    body.member-mode #memberPanel>div:first-child{position:sticky;top:0;z-index:20;background:#080d09;padding:8px 0 14px}
+    body.member-mode #distributorDashboard,body.member-mode #adminDashboard{width:100%;max-width:none}
+    body.member-mode #distributorDashboard>div,body.member-mode #adminDashboard>div{min-width:0}
+    body.member-mode #amanah-products,body.member-mode #our-community{display:none!important}
+    @media(max-width:640px){body.member-mode #memberPanel{padding:14px}body.member-mode #memberPanel .grid{min-width:0}}
   </style>
 </head>
 <body class="min-h-screen">
@@ -43,7 +57,7 @@
     </div>
   </header>
   <main class="mx-auto max-w-7xl px-5 pb-12">
-    <div class="grid items-center gap-10 py-10 lg:grid-cols-[1.08fr_.92fr] lg:py-14">
+    <div id="landingTop" class="grid items-center gap-10 py-10 lg:grid-cols-[1.08fr_.92fr] lg:py-14">
       <section class="hero-surface relative overflow-hidden rounded-[2rem] px-7 py-10 shadow-2xl sm:px-10 sm:py-14">
         <div class="absolute -right-16 -top-12 h-64 w-64 rounded-full border border-white/10"></div><div class="absolute -right-4 -top-2 h-40 w-40 rounded-full border border-white/10"></div>
         <p class="eyebrow text-[10px] font-bold uppercase text-[#e8ce83]">A healthier journey · A stronger community</p>
@@ -269,6 +283,7 @@
       message.textContent = 'Your login is valid, but your AMANAH member profile is missing. Ask the administrator to run the profile repair SQL migration in Supabase, then sign in again.';
       return;
     }
+    document.body.classList.add('member-mode');
     authPanel.classList.add('hide'); memberPanel.classList.remove('hide');
     document.getElementById('memberName').textContent = profile.full_name || user.email;
     document.getElementById('memberRole').textContent = roleNames[profile.role] || profile.role;
@@ -551,11 +566,12 @@
   }
 
   document.getElementById('signOut').addEventListener('click', async () => {
-    await client.auth.signOut(); memberPanel.classList.add('hide'); authPanel.classList.remove('hide');
+    await client.auth.signOut(); document.body.classList.remove('member-mode'); memberPanel.classList.add('hide'); authPanel.classList.remove('hide');
   });
   client.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session?.user) setTimeout(() => loadProfile(session.user), 0);
     if (event === 'SIGNED_OUT') {
+      document.body.classList.remove('member-mode');
       memberPanel.classList.add('hide');
       authPanel.classList.remove('hide');
       document.getElementById('distributorDashboard').classList.add('hide');
