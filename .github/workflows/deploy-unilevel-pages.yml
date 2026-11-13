@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "unilevel/**"
+      - "index.html"
       - ".github/workflows/deploy-unilevel-pages.yml"
   workflow_dispatch:
 
