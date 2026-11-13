@@ -129,6 +129,16 @@
             </section>
           </div>
           <p id="homeDataMessage" role="status" class="text-xs muted">Loading your account summary…</p>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <section class="rounded-xl border border-white/10 bg-black/20 p-4">
+              <div class="flex items-center justify-between gap-2"><h4 class="font-bold">My Direct Referrals</h4><span id="referralListCount" class="text-xs muted">—</span></div>
+              <div id="myReferralList" class="mt-3 space-y-2"><p class="text-xs muted">Loading referrals…</p></div>
+            </section>
+            <section class="rounded-xl border border-white/10 bg-black/20 p-4">
+              <div class="flex items-center justify-between gap-2"><h4 class="font-bold">My Recent Orders</h4><span id="recentOrderCount" class="text-xs muted">—</span></div>
+              <div id="myRecentOrders" class="mt-3 space-y-2"><p class="text-xs muted">Loading orders…</p></div>
+            </section>
+          </div>
         </section>
         <section id="adminDashboard" class="hide mt-6 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
@@ -437,11 +447,13 @@
   async function loadDistributorHome(memberId) {
     const note = document.getElementById('homeDataMessage');
     note.textContent = 'Loading your account summary…';
-    const [walletResult, orderResult, referralResult, commissionResult] = await Promise.all([
+    const [walletResult, orderResult, referralResult, commissionResult, referralListResult, recentOrdersResult] = await Promise.all([
       client.from('wallets').select('available_balance').eq('member_id', memberId).maybeSingle(),
       client.from('orders').select('id', {count: 'exact', head: true}).eq('buyer_id', memberId),
       client.from('profiles').select('id', {count: 'exact', head: true}).eq('sponsor_id', memberId),
-      client.from('commissions').select('amount').eq('beneficiary_id', memberId)
+      client.from('commissions').select('amount').eq('beneficiary_id', memberId),
+      client.from('profiles').select('member_code,full_name,created_at,is_active').eq('sponsor_id', memberId).order('created_at', {ascending: false}).limit(10),
+      client.from('orders').select('order_number,status,total,created_at').eq('buyer_id', memberId).order('created_at', {ascending: false}).limit(10)
     ]);
     const money = value => '₱' + Number(value || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('homeWallet').textContent = walletResult.error ? 'Unavailable' : money(walletResult.data?.available_balance);
@@ -449,7 +461,22 @@
     document.getElementById('homeReferrals').textContent = referralResult.error ? '—' : String(referralResult.count ?? 0);
     const commissionTotal = (commissionResult.data || []).reduce((sum, row) => sum + Number(row.amount || 0), 0);
     document.getElementById('homeCommissions').textContent = commissionResult.error ? 'Unavailable' : money(commissionTotal);
-    const errors = [walletResult, orderResult, referralResult, commissionResult].filter(result => result.error);
+    const referralList = document.getElementById('myReferralList');
+    const referrals = referralListResult.data || [];
+    document.getElementById('referralListCount').textContent = referralListResult.error ? 'Unavailable' : referrals.length + ' shown';
+    referralList.innerHTML = referralListResult.error
+      ? '<p class="text-xs text-amber-300">Referral list could not be loaded. Check profile read permissions.</p>'
+      : referrals.length
+        ? referrals.map(person => '<div class="flex items-center justify-between gap-2 rounded-lg border border-white/10 p-3"><div class="min-w-0"><p class="truncate text-sm font-semibold">' + safeCartText(person.full_name || 'AMANAH Member') + '</p><p class="text-xs muted">' + safeCartText(person.member_code || 'Code pending') + '</p></div><span class="shrink-0 text-[11px] ' + (person.is_active ? 'text-emerald-300' : 'text-amber-300') + '">' + (person.is_active ? 'Active' : 'Inactive') + '</span></div>').join('')
+        : '<p class="text-xs muted">No direct referrals yet.</p>';
+    const recentOrders = recentOrdersResult.data || [];
+    document.getElementById('recentOrderCount').textContent = recentOrdersResult.error ? 'Unavailable' : recentOrders.length + ' shown';
+    document.getElementById('myRecentOrders').innerHTML = recentOrdersResult.error
+      ? '<p class="text-xs text-amber-300">Order history could not be loaded. Check order read permissions.</p>'
+      : recentOrders.length
+        ? recentOrders.map(order => '<div class="rounded-lg border border-white/10 p-3"><div class="flex items-center justify-between gap-2"><p class="text-sm font-semibold text-yellow-300">' + safeCartText(order.order_number || 'Order') + '</p><span class="text-[11px] text-emerald-300">' + safeCartText(order.status || 'Submitted') + '</span></div><div class="mt-1 flex items-center justify-between gap-2 text-xs muted"><span>' + (order.created_at ? new Date(order.created_at).toLocaleDateString('en-PH') : 'Date unavailable') + '</span><strong>' + money(order.total) + '</strong></div></div>').join('')
+        : '<p class="text-xs muted">You have not submitted any orders yet.</p>';
+    const errors = [walletResult, orderResult, referralResult, commissionResult, referralListResult, recentOrdersResult].filter(result => result.error);
     note.textContent = errors.length
       ? 'Some summary figures could not be loaded. Check the table permissions and try again.'
       : 'Summary loaded from your AMANAH Unilevel account. Commission figure is the total of recorded commission entries, not necessarily withdrawable balance.';
