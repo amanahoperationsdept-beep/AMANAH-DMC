@@ -42,7 +42,7 @@
       <div id="authPanel">
         <div class="mb-6"><h2 class="text-2xl font-extrabold">Member access</h2><p class="mt-1 text-sm muted">Sign in to your AMANAH account.</p></div>
         <form id="loginForm" class="space-y-4">
-          <label class="block text-sm">Email address<input id="email" type="email" required autocomplete="username" class="mt-2 w-full rounded-xl px-4 py-3"></label>
+          <label class="block text-sm">Username or email<input id="loginIdentifier" type="text" required autocomplete="username" placeholder="Enter your username or email" class="mt-2 w-full rounded-xl px-4 py-3"></label>
           <label class="block text-sm">Password<input id="password" type="password" required autocomplete="current-password" class="mt-2 w-full rounded-xl px-4 py-3"></label>
           <button class="gold w-full rounded-xl px-4 py-3 font-extrabold" type="submit">Sign in</button>
         </form>
@@ -180,8 +180,12 @@
 
   document.getElementById('loginForm').addEventListener('submit', async (event) => {
     event.preventDefault(); message.textContent = 'Signing in…';
+    const loginIdentifier = document.getElementById('loginIdentifier').value.trim();
+    const loginEmail = loginIdentifier.toLowerCase() === 'amanahdmc'
+      ? 'amanahoperationsdept@gmail.com'
+      : loginIdentifier;
     const {data: signInData, error} = await client.auth.signInWithPassword({
-      email: document.getElementById('email').value.trim(),
+      email: loginEmail,
       password: document.getElementById('password').value
     });
     message.textContent = error ? error.message : '';
