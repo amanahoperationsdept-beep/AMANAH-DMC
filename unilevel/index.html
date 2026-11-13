@@ -213,7 +213,7 @@
     const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     list.innerHTML = data.map(product => `
       <article class="overflow-hidden rounded-xl border border-white/10 bg-black/20">
-        ${product.image_path && /^https:\/\/bqgxvnrgjmngezknqhsl\\.supabase\\.co\//i.test(product.image_path) ? `<img src="${safe(product.image_path)}" alt="${safe(product.name)}" loading="lazy" class="h-48 w-full bg-white object-contain p-2" onerror="this.style.display='none'">` : ''}
+        ${product.image_path && String(product.image_path).startsWith('https://bqgxvnrgjmngezknqhsl.supabase.co/') ? `<img src="${safe(product.image_path)}" alt="${safe(product.name)}" loading="lazy" class="h-48 w-full bg-white object-contain p-2" onerror="this.style.display='none'">` : ''}
         <div class="p-4">
         <p class="text-sm font-bold">${safe(product.name)}</p>
         <p class="mt-2 text-xs muted">SRP: <span class="line-through">${money(product.srp)}</span></p>
