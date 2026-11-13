@@ -12,6 +12,7 @@ const url = Deno.env.get("SUPABASE_URL")!;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+const AUTH_EMAIL_DOMAIN = "members.amanah.invalid";
 
 async function hashCode(code: string) {
   const bytes = new TextEncoder().encode(code.trim().toUpperCase());
@@ -22,6 +23,9 @@ function makeCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const bytes = crypto.getRandomValues(new Uint8Array(12));
   return "AM-" + [...bytes].map((b) => alphabet[b % alphabet.length]).join("");
+}
+function internalEmail(username: string) {
+  return username.toLowerCase() + "@" + AUTH_EMAIL_DOMAIN;
 }
 
 Deno.serve(async (req) => {
@@ -61,38 +65,77 @@ Deno.serve(async (req) => {
       const fullName = String(body.full_name || "").trim();
       const sponsorCode = String(body.sponsor_code || "").trim().toUpperCase();
       const activationCode = String(body.activation_code || "").trim().toUpperCase();
+
       if (!/^[a-z0-9._-]{4,24}$/.test(username)) return json({ error: "Username must be 4–24 characters: letters, numbers, dot, dash or underscore." }, 400);
       if (!/^\+[1-9]\d{7,14}$/.test(phone)) return json({ error: "Enter mobile number in international format, e.g. +639171234567." }, 400);
       if (password.length < 8) return json({ error: "Password must be at least 8 characters." }, 400);
       if (fullName.length < 2 || !activationCode) return json({ error: "Full name and activation code are required." }, 400);
-      const codeHash = await hashCode(activationCode);
-      const { data: consumed, error: consumeError } = await admin.rpc("consume_amanah_activation_code", { p_code_hash: codeHash });
-      if (consumeError || consumed !== true) return json({ error: "Activation code is invalid, expired, or already used." }, 400);
-      const { data: duplicateUser } = await admin.from("profiles").select("id").ilike("username", username).maybeSingle();
-      if (duplicateUser) return json({ error: "That username is already taken." }, 409);
+
+      const { data: duplicateUsername } = await admin.from("profiles").select("id").ilike("username", username).maybeSingle();
+      if (duplicateUsername) return json({ error: "That username is already taken." }, 409);
+      const { data: duplicatePhone } = await admin.from("profiles").select("id").eq("phone", phone).maybeSingle();
+      if (duplicatePhone) return json({ error: "That mobile number is already registered. Contact the administrator if you need help." }, 409);
+
+      let sponsorId: string | null = null;
       if (sponsorCode) {
         const { data: sponsor } = await admin.from("profiles").select("id").eq("member_code", sponsorCode).eq("is_active", true).maybeSingle();
         if (!sponsor) return json({ error: "Active sponsor code not found. Check the code with your sponsor." }, 400);
+        sponsorId = sponsor.id;
       }
-      const { data: existingPhone } = await admin.auth.admin.listUsers({ page: 1, perPage: 1 });
-      void existingPhone;
+
+      const codeHash = await hashCode(activationCode);
+      const { data: validCode } = await admin.from("activation_codes").select("id")
+        .eq("code_hash", codeHash).is("used_at", null).gt("expires_at", new Date().toISOString()).maybeSingle();
+      if (!validCode) return json({ error: "Activation code is invalid, expired, or already used." }, 400);
+
+      // Supabase Auth requires an email or phone identity. This private .invalid
+      // address is never emailed; the member signs in using their AMANAH username.
       const { data: created, error: createError } = await admin.auth.admin.createUser({
-        phone, password, phone_confirm: false,
-        user_metadata: { full_name: fullName, phone, username, sponsor_code: sponsorCode || null },
+        email: internalEmail(username),
+        email_confirm: true,
+        password,
+        user_metadata: {
+          full_name: fullName, phone, username,
+          sponsor_code: sponsorCode || null,
+        },
       });
       if (createError || !created.user) return json({ error: createError?.message || "Could not create account." }, 400);
-      return json({ success: true, username, member_code: "AM-" + created.user.id.replaceAll("-", "").slice(0, 8).toUpperCase() });
+
+      // Consume the activation code only after Auth creation. The SQL update is
+      // atomic; if another request used the code first, delete this new Auth user.
+      const { data: consumed, error: consumeError } = await admin.rpc("consume_amanah_activation_code", {
+        p_code_hash: codeHash, p_user_id: created.user.id,
+      });
+      if (consumeError || consumed !== true) {
+        await admin.auth.admin.deleteUser(created.user.id);
+        return json({ error: "This activation code was just used or expired. Please request another code." }, 409);
+      }
+      // Keep the validated sponsor relationship explicit and correct.
+      if (sponsorId) {
+        const { error: sponsorUpdateError } = await admin.from("profiles").update({ sponsor_id: sponsorId }).eq("id", created.user.id);
+        if (sponsorUpdateError) {
+          await admin.auth.admin.deleteUser(created.user.id);
+          return json({ error: "Account setup could not be completed. Please contact the administrator." }, 500);
+        }
+      }
+      return json({
+        success: true, username,
+        member_code: "AM-" + created.user.id.replaceAll("-", "").slice(0, 8).toUpperCase(),
+      });
     }
 
     if (action === "login") {
       const username = String(body.username || "").trim().toLowerCase();
       const password = String(body.password || "");
-      if (!username || !password) return json({ error: "Enter username and password." }, 400);
-      const { data: profile, error: lookupError } = await admin.from("profiles").select("phone,is_active").ilike("username", username).maybeSingle();
-      if (lookupError || !profile?.phone) return json({ error: "Username or password is incorrect." }, 401);
+      if (!/^[a-z0-9._-]{4,24}$/.test(username) || !password) return json({ error: "Username or password is incorrect." }, 401);
+      const { data: profile, error: lookupError } = await admin.from("profiles")
+        .select("id,is_active").ilike("username", username).maybeSingle();
+      if (lookupError || !profile) return json({ error: "Username or password is incorrect." }, 401);
       if (!profile.is_active) return json({ error: "This account is inactive. Contact the administrator." }, 403);
       const publicClient = createClient(url, anonKey, { auth: { persistSession: false } });
-      const { data, error } = await publicClient.auth.signInWithPassword({ phone: profile.phone, password });
+      const { data, error } = await publicClient.auth.signInWithPassword({
+        email: internalEmail(username), password,
+      });
       if (error || !data.session) return json({ error: "Username or password is incorrect." }, 401);
       return json({ session: data.session, user: data.user });
     }
