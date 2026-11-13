@@ -95,7 +95,8 @@
                 <div class="flex items-center justify-between"><h5 class="font-bold">My Cart</h5><span id="cartCount" class="text-xs muted">0 items</span></div>
                 <div id="cartItems" class="mt-3 space-y-2"><p class="text-xs muted">Your cart is empty.</p></div>
                 <div class="mt-3 flex items-center justify-between border-t border-white/10 pt-3"><span class="text-sm font-semibold">Cart total</span><strong id="cartTotal" class="text-lg text-yellow-300">₱0.00</strong></div>
-                <p class="mt-2 text-xs muted">Add products here. Order submission and payment will be enabled after the cart is tested.</p>
+                <button id="submitMemberOrder" type="button" class="gold mt-4 w-full rounded-lg px-4 py-3 font-extrabold">Submit order</button>
+                <p id="orderMessage" role="status" class="mt-3 text-xs muted">Submitting an order records your request only. No payment is collected online.</p>
               </section>
             </section>
           </div>
@@ -301,6 +302,38 @@
     if (button.dataset.cartAction === 'minus') item.quantity -= 1;
     if (button.dataset.cartAction === 'remove' || item.quantity <= 0) cart.delete(item.id);
     renderCart();
+  });
+
+  document.getElementById('submitMemberOrder').addEventListener('click', async () => {
+    const button = document.getElementById('submitMemberOrder');
+    const note = document.getElementById('orderMessage');
+    if (cart.size === 0) {
+      note.textContent = 'Your cart is empty. Add at least one product before submitting.';
+      return;
+    }
+    const items = Array.from(cart.values()).map(item => ({
+      product_id: item.id,
+      quantity: item.quantity
+    }));
+    button.disabled = true;
+    button.textContent = 'Submitting order…';
+    note.textContent = 'Verifying product availability and official role-based prices…';
+    try {
+      const {data, error} = await client.rpc('submit_member_order', {p_items: items});
+      if (error) throw error;
+      const result = typeof data === 'string' ? JSON.parse(data) : data;
+      cart.clear();
+      renderCart();
+      note.textContent = 'Order submitted successfully. Order number: ' + (result.order_number || 'Created') +
+        '. Total: ' + formatMoney(result.total) + '. Status: Submitted. No payment was collected.';
+      const {data: userData} = await client.auth.getUser();
+      if (userData?.user) await loadDistributorHome(userData.user.id);
+    } catch (error) {
+      note.textContent = 'Order was not submitted: ' + (error?.message || 'Please try again.');
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Submit order';
+    }
   });
 
   async function loadDistributorHome(memberId) {
