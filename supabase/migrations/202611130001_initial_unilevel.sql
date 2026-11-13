@@ -194,7 +194,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $
+as $$
 declare
   v_sponsor_id uuid;
   v_sponsor_code text;
@@ -220,7 +220,7 @@ begin
   insert into public.wallets(member_id) values(new.id) on conflict do nothing;
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists on_auth_user_created_amanah on auth.users;
 create trigger on_auth_user_created_amanah
