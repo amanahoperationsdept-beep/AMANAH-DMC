@@ -115,6 +115,8 @@
           <button type="button" data-dash-nav="products" class="dashboard-tab">Products &amp; Orders</button>
           <button type="button" data-dash-nav="referrals" class="dashboard-tab" id="navReferrals">My Referrals</button>
           <button type="button" data-dash-nav="history" class="dashboard-tab" id="navHistory">Order History</button>
+          <button type="button" data-dash-nav="genealogy" class="dashboard-tab" id="navGenealogy">10-Level Genealogy</button>
+          <button type="button" data-dash-nav="commissions" class="dashboard-tab" id="navCommissions">PV Commissions</button>
           <button type="button" data-dash-nav="admin-orders" class="dashboard-tab hide" id="navAdminOrders">Submitted Orders</button>
         </nav>
         <div class="mt-6 grid grid-cols-2 gap-3">
@@ -123,6 +125,17 @@
         </div>
         <div class="mt-6 rounded-xl border border-yellow-500/20 p-4"><h3 class="font-bold">Portal access</h3><p class="mt-2 text-sm leading-6 muted">Your role is authenticated. Dashboard modules will be enabled as their secure workflows are implemented and tested.</p></div>
         <div id="roleModules" class="mt-4 grid gap-2 sm:grid-cols-2"></div>
+        <section id="memberGenealogySection" class="mt-5 rounded-xl border border-emerald-500/20 bg-black/20 p-4">
+          <div class="flex flex-wrap items-center justify-between gap-2"><div><h3 class="font-bold">My 10-Level Genealogy</h3><p class="text-xs muted">Your sponsor network, up to ten generations below you.</p></div><button id="refreshGenealogy" type="button" class="rounded-lg border border-yellow-500/30 px-3 py-2 text-xs">Refresh</button></div>
+          <p id="genealogyMessage" role="status" class="mt-3 text-xs muted">Loading genealogy…</p>
+          <div id="genealogySummary" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5"></div>
+          <div id="genealogyList" class="mt-3 space-y-2"></div>
+        </section>
+        <section id="memberCommissionSection" class="mt-5 rounded-xl border border-yellow-500/20 bg-black/20 p-4">
+          <div class="flex flex-wrap items-center justify-between gap-2"><div><h3 class="font-bold">My PV Unilevel Commissions</h3><p class="text-xs muted">Commission entries recorded for your account.</p></div><button id="refreshCommissions" type="button" class="rounded-lg border border-yellow-500/30 px-3 py-2 text-xs">Refresh</button></div>
+          <p id="commissionMessage" role="status" class="mt-3 text-xs muted">Loading commission history…</p>
+          <div id="memberCommissionList" class="mt-3 space-y-2"></div>
+        </section>
         <section id="distributorDashboard" class="hide mt-6 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div><p class="text-xs uppercase tracking-widest text-emerald-300">Distributor workspace</p><h3 class="mt-1 text-xl font-extrabold">My business overview</h3></div>
@@ -340,6 +353,8 @@
       products: document.getElementById('dashboardProductsSection'),
       referrals: document.getElementById('dashboardReferralsSection'),
       history: document.getElementById('dashboardHistorySection'),
+      genealogy: document.getElementById('memberGenealogySection'),
+      commissions: document.getElementById('memberCommissionSection'),
       'admin-orders': document.getElementById('adminDashboard')
     };
     if (section === 'products') {
@@ -349,6 +364,8 @@
     if (section === 'overview') {
       document.getElementById('distributorCatalog').classList.add('hide');
     }
+    if (section === 'genealogy') loadMemberGenealogy();
+    if (section === 'commissions') loadMemberCommissions();
     const target = targets[section];
     if (target) target.scrollIntoView({behavior:'smooth',block:'start'});
     dashboardNav.querySelectorAll('[data-dash-nav]').forEach(button => {
@@ -543,6 +560,49 @@
       button.textContent = 'Submit order';
     }
   });
+
+  async function loadMemberGenealogy() {
+    const note = document.getElementById('genealogyMessage');
+    const list = document.getElementById('genealogyList');
+    const summary = document.getElementById('genealogySummary');
+    note.textContent = 'Loading your downline through Level 10…';
+    list.innerHTML = '';
+    summary.innerHTML = '';
+    const {data, error} = await client.rpc('get_my_genealogy');
+    if (error) {
+      note.textContent = 'Genealogy could not be loaded: ' + (error.message || 'Please verify migration 008 and RPC permissions.');
+      return;
+    }
+    const members = data || [];
+    const counts = Array.from({length:10}, (_,i) => members.filter(row => Number(row.level_number) === i+1).length);
+    summary.innerHTML = counts.map((count,i) => '<div class="rounded-lg border border-white/10 p-2 text-center"><p class="text-[10px] muted">Level ' + (i+1) + '</p><p class="mt-1 text-lg font-black text-yellow-300">' + count + '</p></div>').join('');
+    list.innerHTML = members.length ? members.map(person => '<div class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 p-3"><div class="min-w-0"><p class="text-sm font-semibold">' + safeCartText(person.full_name || 'AMANAH Member') + '</p><p class="text-xs muted">' + safeCartText(person.member_code || 'Code pending') + ' · ' + safeCartText(person.role || 'Member') + '</p></div><div class="text-right"><p class="text-xs font-bold text-yellow-300">Level ' + Number(person.level_number) + '</p><p class="text-[10px] ' + (person.is_active ? 'text-emerald-300' : 'text-amber-300') + '">' + (person.is_active ? 'Active' : 'Inactive') + '</p></div></div>').join('') : '<p class="text-xs muted">No downline members have been registered under your sponsorship yet.</p>';
+    note.textContent = members.length + ' downline member(s) found across ' + counts.filter(Boolean).length + ' active level(s).';
+  }
+
+  async function loadMemberCommissions() {
+    const note = document.getElementById('commissionMessage');
+    const list = document.getElementById('memberCommissionList');
+    note.textContent = 'Loading your commission ledger…';
+    list.innerHTML = '';
+    const {data, error} = await client.from('commissions')
+      .select('level_number,commission_type,basis_amount,rate,amount,status,created_at,order_id')
+      .eq('commission_type', 'unilevel')
+      .order('created_at', {ascending:false})
+      .limit(100);
+    if (error) {
+      note.textContent = 'Commission history could not be loaded: ' + (error.message || 'Check commission table permissions.');
+      return;
+    }
+    const rows = data || [];
+    const total = rows.reduce((sum,row) => sum + Number(row.amount || 0), 0);
+    const money = value => '₱' + Number(value || 0).toLocaleString('en-PH', {minimumFractionDigits:2,maximumFractionDigits:2});
+    list.innerHTML = rows.length ? rows.map(row => '<div class="rounded-lg border border-white/10 p-3"><div class="flex flex-wrap items-center justify-between gap-2"><p class="text-sm font-semibold text-yellow-300">Level ' + Number(row.level_number || 0) + ' · ' + safeCartText(row.commission_type) + '</p><strong>' + money(row.amount) + '</strong></div><div class="mt-1 flex flex-wrap justify-between gap-2 text-xs muted"><span>' + Number(row.basis_amount || 0).toFixed(2) + ' PV × ' + Number(row.rate || 0) + '%</span><span>' + safeCartText(row.status || 'pending') + '</span></div><p class="mt-1 text-[10px] muted">' + (row.created_at ? new Date(row.created_at).toLocaleString('en-PH') : 'Date unavailable') + '</p></div>').join('') : '<p class="text-xs muted">No Unilevel commission entries recorded yet. Entries are created when an eligible order is marked completed.</p>';
+    note.textContent = rows.length + ' entries · Total recorded: ' + money(total) + '. This is not necessarily your withdrawable balance.';
+  }
+
+  document.getElementById('refreshGenealogy').addEventListener('click', loadMemberGenealogy);
+  document.getElementById('refreshCommissions').addEventListener('click', loadMemberCommissions);
 
   async function loadDistributorHome(memberId) {
     const note = document.getElementById('homeDataMessage');
