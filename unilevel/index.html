@@ -98,12 +98,13 @@
         <button id="showSignup" class="w-full rounded-xl border border-white/15 px-4 py-3 text-sm font-bold">Create a new distributor account</button>
         <form id="signupForm" class="hide mt-5 space-y-3">
           <input id="newName" required placeholder="Full name" class="w-full rounded-xl px-4 py-3">
-          <input id="newPhone" placeholder="Mobile number" class="w-full rounded-xl px-4 py-3">
-          <input id="newEmail" type="email" required placeholder="Email address" class="w-full rounded-xl px-4 py-3">
-          <input id="newPassword" type="password" minlength="8" required placeholder="Password (at least 8 characters)" class="w-full rounded-xl px-4 py-3">
+          <input id="newUsername" required minlength="4" maxlength="24" autocomplete="username" placeholder="Choose username (4–24 characters)" class="w-full rounded-xl px-4 py-3">
+          <input id="newPhone" type="tel" required placeholder="Mobile number (+639…)" class="w-full rounded-xl px-4 py-3">
+          <input id="newPassword" type="password" minlength="8" required autocomplete="new-password" placeholder="Password (at least 8 characters)" class="w-full rounded-xl px-4 py-3">
           <input id="sponsorCode" placeholder="Sponsor member code (optional)" class="w-full rounded-xl px-4 py-3">
+          <input id="activationCode" required autocomplete="off" placeholder="One-time activation code" class="w-full rounded-xl px-4 py-3">
           <button class="gold w-full rounded-xl px-4 py-3 font-extrabold" type="submit">Register distributor</button>
-          <p class="text-xs muted">New registrations receive the Distributor role. An administrator must assign any higher role.</p>
+          <p class="text-xs muted">Use your username to sign in. Your mobile number is used privately for account authentication. Enter it in international format, e.g. +639171234567.</p>
         </form>
         <p id="authMessage" role="status" class="mt-4 text-sm text-amber-300"></p>
       </div>
@@ -206,6 +207,20 @@
             <div><p class="text-xs uppercase tracking-widest text-emerald-300">Administrator workspace</p><h3 class="mt-1 text-xl font-extrabold">Submitted orders</h3><p class="mt-1 text-xs muted">Recent member orders · view only</p></div>
             <button id="refreshAdminOrders" type="button" class="rounded-lg border border-yellow-500/30 px-3 py-2 text-xs font-bold">Refresh orders</button>
           </div>
+          <section class="rounded-xl border border-yellow-500/20 bg-black/20 p-4 space-y-3">
+            <div><h4 class="font-bold text-yellow-300">Batch activation code generator</h4><p class="text-xs muted">Create one-time codes for new Distributor registrations. Codes are shown only once after generation.</p></div>
+            <form id="activationBatchForm" class="flex flex-wrap items-end gap-3">
+              <label class="text-xs">Number of codes<input id="activationCount" type="number" min="1" max="100" value="10" required class="mt-1 block w-28 rounded-lg px-3 py-2"></label>
+              <label class="text-xs">Expiry (days)<input id="activationExpiry" type="number" min="1" max="365" value="30" required class="mt-1 block w-28 rounded-lg px-3 py-2"></label>
+              <button class="gold rounded-lg px-4 py-2 text-xs font-extrabold" type="submit">Generate batch</button>
+            </form>
+            <p id="activationBatchMessage" role="status" class="text-xs muted"></p>
+            <div id="activationBatchOutput" class="hide rounded-lg border border-white/10 p-3">
+              <div class="flex flex-wrap items-center justify-between gap-2"><strong class="text-sm">New activation codes</strong><button id="copyActivationCodes" type="button" class="rounded-lg border border-white/20 px-3 py-2 text-xs">Copy all codes</button></div>
+              <pre id="activationCodesList" class="mt-3 whitespace-pre-wrap break-all text-xs leading-6 text-emerald-200"></pre>
+              <p id="activationExpiryLabel" class="mt-2 text-xs muted"></p>
+            </div>
+          </section>
           <p id="adminOrdersMessage" role="status" class="text-xs muted">Loading orders…</p>
           <div id="adminOrdersList" class="space-y-3"></div>
         </section>
@@ -265,32 +280,46 @@
   document.getElementById('loginForm').addEventListener('submit', async (event) => {
     event.preventDefault(); message.textContent = 'Signing in…';
     const loginIdentifier = document.getElementById('loginIdentifier').value.trim();
-    const loginEmail = loginIdentifier.toLowerCase() === 'amanahdmc'
-      ? 'amanahoperationsdept@gmail.com'
-      : loginIdentifier;
-    const {data: signInData, error} = await client.auth.signInWithPassword({
-      email: loginEmail,
-      password: document.getElementById('password').value
-    });
-    message.textContent = error ? error.message : '';
+    const passwordValue = document.getElementById('password').value;
+    let signInData, error;
+    if (loginIdentifier.toLowerCase() === 'amanahdmc' || loginIdentifier.includes('@')) {
+      const result = await client.auth.signInWithPassword({
+        email: loginIdentifier.toLowerCase() === 'amanahdmc' ? 'amanahoperationsdept@gmail.com' : loginIdentifier,
+        password: passwordValue
+      });
+      signInData = result.data; error = result.error;
+    } else {
+      const result = await client.functions.invoke('amanah-registration', {
+        body: { action: 'login', username: loginIdentifier, password: passwordValue }
+      });
+      error = result.error;
+      if (!error && result.data?.session) {
+        const saved = await client.auth.setSession(result.data.session);
+        error = saved.error;
+        signInData = { user: result.data.user };
+      } else if (!error) error = new Error(result.data?.error || 'Sign-in failed.');
+    }
+    message.textContent = error ? (error.message || 'Sign-in failed.') : '';
     if (!error && signInData?.user) await loadProfile(signInData.user);
   });
 
   document.getElementById('signupForm').addEventListener('submit', async (event) => {
     event.preventDefault(); message.textContent = 'Creating account…';
-    const fullName = document.getElementById('newName').value.trim();
-    const phone = document.getElementById('newPhone').value.trim();
-    const sponsorCode = document.getElementById('sponsorCode').value.trim();
-    if (sponsorCode) {
-      const {data: sponsor, error: sponsorError} = await client.from('profiles').select('id').eq('member_code', sponsorCode).eq('is_active', true).maybeSingle();
-      if (sponsorError || !sponsor) { message.textContent = 'Active sponsor code not found. Check the code or leave it blank.'; return; }
-    }
-    const {error} = await client.auth.signUp({
-      email: document.getElementById('newEmail').value.trim(),
+    const payload = {
+      action: 'register',
+      full_name: document.getElementById('newName').value.trim(),
+      username: document.getElementById('newUsername').value.trim(),
+      phone: document.getElementById('newPhone').value.trim(),
       password: document.getElementById('newPassword').value,
-      options: {data: {full_name: fullName, phone, sponsor_code: sponsorCode || null}}
-    });
-    message.textContent = error ? error.message : 'Registration submitted. Check your email if confirmation is enabled. Your default role is Distributor.';
+      sponsor_code: document.getElementById('sponsorCode').value.trim(),
+      activation_code: document.getElementById('activationCode').value.trim()
+    };
+    const {data, error} = await client.functions.invoke('amanah-registration', {body: payload});
+    if (error || data?.error) {
+      message.textContent = data?.error || error?.message || 'Registration failed. Please check the details.';
+      return;
+    }
+    message.textContent = 'Registration successful. Your AMANAH member code is ' + data.member_code + '. Sign in with your username and password.';
     document.getElementById('signupForm').reset();
   });
 
@@ -673,6 +702,35 @@
       ? 'Some summary figures could not be loaded. Check the table permissions and try again.'
       : 'Summary loaded from your AMANAH Unilevel account. Commission figure is the total of recorded commission entries, not necessarily withdrawable balance.';
   }
+
+  document.getElementById('activationBatchForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const note = document.getElementById('activationBatchMessage');
+    const output = document.getElementById('activationBatchOutput');
+    const button = event.submitter;
+    note.textContent = 'Generating secure one-time codes…';
+    output.classList.add('hide');
+    if (button) button.disabled = true;
+    try {
+      const {data, error} = await client.functions.invoke('amanah-registration', {
+        body: { action: 'create_batch', count: Number(document.getElementById('activationCount').value), expiry_days: Number(document.getElementById('activationExpiry').value) }
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message || 'Batch generation failed.');
+      document.getElementById('activationCodesList').textContent = data.codes.join('\\n');
+      document.getElementById('activationExpiryLabel').textContent = 'Batch expires: ' + new Date(data.expires_at).toLocaleString('en-PH') + '. Save or copy these codes now; they cannot be viewed again.';
+      output.classList.remove('hide');
+      note.textContent = data.codes.length + ' activation code(s) generated successfully.';
+    } catch (err) {
+      note.textContent = err.message || 'Could not generate codes.';
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
+  document.getElementById('copyActivationCodes').addEventListener('click', async () => {
+    const codes = document.getElementById('activationCodesList').textContent;
+    await navigator.clipboard.writeText(codes);
+    document.getElementById('activationBatchMessage').textContent = 'Activation codes copied. Store them securely and distribute individually.';
+  });
 
   document.getElementById('refreshAdminOrders').addEventListener('click', loadAdminOrders);
 
