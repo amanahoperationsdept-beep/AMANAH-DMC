@@ -319,6 +319,7 @@
       message.textContent = 'Your login is valid, but your AMANAH member profile is missing. Ask the administrator to run the profile repair SQL migration in Supabase, then sign in again.';
       return;
     }
+    activeMemberRole = profile.role;
     document.body.classList.add('member-mode');
     authPanel.classList.add('hide'); memberPanel.classList.remove('hide');
     document.getElementById('memberName').textContent = profile.full_name || user.email;
@@ -343,10 +344,12 @@
     } else {
       document.getElementById('roleModules').classList.remove('hide');
     }
+    showDashboardSection(profile.role === 'administrator' ? 'admin-orders' : 'overview');
     })();
     try { await profileLoadPromise; } finally { profileLoadPromise = null; }
   }
 
+  let activeMemberRole = '';
   const dashboardNav = document.getElementById('dashboardNav');
   function showDashboardSection(section) {
     const memberCodeStatus = document.querySelector('#memberPanel > .mt-6.grid.grid-cols-2');
@@ -363,12 +366,13 @@
     const distributorStatus = distributor?.children[3];
     const distributorLists = distributor?.children[4];
     const overview = section === 'overview';
+    const canSeeDistributor = activeMemberRole === 'distributor';
     [memberCodeStatus, portalAccess, roleModules, distributor, admin, genealogy, commissions].forEach(node => node?.classList.add('hide'));
     if (section === 'overview') {
       memberCodeStatus?.classList.remove('hide');
       portalAccess?.classList.remove('hide');
       roleModules?.classList.toggle('hide', !roleModules.innerHTML.trim());
-      distributor?.classList.remove('hide');
+      distributor?.classList.toggle('hide', !canSeeDistributor);
       distributorSummary?.classList.remove('hide');
       distributorStatus?.classList.remove('hide');
       distributorLists?.classList.remove('hide');
