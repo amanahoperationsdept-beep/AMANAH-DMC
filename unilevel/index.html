@@ -123,16 +123,14 @@
     const fullName = document.getElementById('newName').value.trim();
     const phone = document.getElementById('newPhone').value.trim();
     const sponsorCode = document.getElementById('sponsorCode').value.trim();
-    let sponsorId = null;
     if (sponsorCode) {
-      const {data: sponsor, error: sponsorError} = await client.from('profiles').select('id').eq('member_code', sponsorCode).maybeSingle();
-      if (sponsorError || !sponsor) { message.textContent = 'Sponsor code not found. Check the code or leave it blank.'; return; }
-      sponsorId = sponsor.id;
+      const {data: sponsor, error: sponsorError} = await client.from('profiles').select('id').eq('member_code', sponsorCode).eq('is_active', true).maybeSingle();
+      if (sponsorError || !sponsor) { message.textContent = 'Active sponsor code not found. Check the code or leave it blank.'; return; }
     }
     const {error} = await client.auth.signUp({
       email: document.getElementById('newEmail').value.trim(),
       password: document.getElementById('newPassword').value,
-      options: {data: {full_name: fullName, phone, sponsor_id: sponsorId}}
+      options: {data: {full_name: fullName, phone, sponsor_code: sponsorCode || null}}
     });
     message.textContent = error ? error.message : 'Registration submitted. Check your email if confirmation is enabled. Your default role is Distributor.';
     document.getElementById('signupForm').reset();
