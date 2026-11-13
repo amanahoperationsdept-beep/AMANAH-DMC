@@ -289,7 +289,7 @@
       });
       signInData = result.data; error = result.error;
     } else {
-      const result = await client.functions.invoke('amanah-registration', {
+      const result = await client.functions.invoke('Amanah-registration', {
         body: { action: 'login', username: loginIdentifier, password: passwordValue }
       });
       error = result.error;
@@ -314,7 +314,7 @@
       sponsor_code: document.getElementById('sponsorCode').value.trim(),
       activation_code: document.getElementById('activationCode').value.trim()
     };
-    const {data, error} = await client.functions.invoke('amanah-registration', {body: payload});
+    const {data, error} = await client.functions.invoke('Amanah-registration', {body: payload});
     if (error || data?.error) {
       message.textContent = data?.error || error?.message || 'Registration failed. Please check the details.';
       return;
@@ -712,7 +712,7 @@
     output.classList.add('hide');
     if (button) button.disabled = true;
     try {
-      const {data, error} = await client.functions.invoke('amanah-registration', {
+      const {data, error} = await client.functions.invoke('Amanah-registration', {
         body: { action: 'create_batch', count: Number(document.getElementById('activationCount').value), expiry_days: Number(document.getElementById('activationExpiry').value) }
       });
       if (error || data?.error) throw new Error(data?.error || error?.message || 'Batch generation failed.');
