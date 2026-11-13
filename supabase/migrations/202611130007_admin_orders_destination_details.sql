@@ -1,6 +1,7 @@
 -- Include selected delivery destination in the read-only Admin Orders feed.
 -- Apply ONLY to Supabase project bqgxvnrgjmngezknqhsl.
-create or replace function public.admin_list_orders(p_limit integer default 50)
+drop function if exists public.admin_list_orders(integer);
+create function public.admin_list_orders(p_limit integer default 50)
 returns jsonb
 language plpgsql
 security definer
