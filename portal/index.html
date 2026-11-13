@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080b09">
+  <title>AMANAH | Unilevel Management Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#080b09;--panel:#101612;--panel2:#151d17;--line:rgba(212,175,55,.17);--gold:#d4af37;--gold2:#f0d77a;--green:#20a464;--muted:#94a39a}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#f5f5ef;font-family:'DM Sans',sans-serif}
+    h1,h2,h3,.brand{font-family:Manrope,sans-serif}
+    .shell{min-height:100vh;background:radial-gradient(ellipse at 80% 0%,rgba(32,164,100,.10),transparent 34%),radial-gradient(ellipse at 20% 10%,rgba(212,175,55,.08),transparent 32%),var(--bg)}
+    .sidebar{width:258px;background:rgba(10,14,11,.96);border-right:1px solid var(--line)}
+    .main{margin-left:258px}
+    .glass{background:linear-gradient(145deg,rgba(22,30,24,.96),rgba(13,18,14,.96));border:1px solid var(--line);box-shadow:0 16px 50px rgba(0,0,0,.18)}
+    .gold-text{background:linear-gradient(110deg,#f5e5a0,#d4af37 58%,#a77b18);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .nav-link{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:12px;color:#aab5ad;font-size:13px;font-weight:600;transition:.2s}
+    .nav-link:hover,.nav-link.active{background:rgba(212,175,55,.10);color:var(--gold2)}
+    .nav-link.active{border:1px solid rgba(212,175,55,.18)}
+    .stat-card{background:linear-gradient(145deg,#151e17,#0e1410);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:19px;min-height:140px}
+    .stat-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(212,175,55,.12);color:var(--gold2)}
+    .role-card{border:1px solid rgba(255,255,255,.08);background:linear-gradient(145deg,rgba(23,32,25,.95),rgba(13,18,14,.95));transition:.22s;cursor:pointer}
+    .role-card:hover,.role-card.selected{border-color:rgba(212,175,55,.65);transform:translateY(-3px);box-shadow:0 14px 35px rgba(0,0,0,.24)}
+    .role-card.selected{background:linear-gradient(145deg,rgba(56,45,16,.48),rgba(16,25,18,.98))}
+    .pill{border:1px solid rgba(32,164,100,.28);background:rgba(32,164,100,.10);color:#72d6a2}
+    .btn-gold{background:linear-gradient(110deg,#f0d77a,#c99d27);color:#11150f;font-weight:800;transition:.2s}
+    .btn-gold:hover{filter:brightness(1.08);transform:translateY(-1px)}
+    .muted{color:var(--muted)}
+    .bar{height:7px;border-radius:99px;background:#263129;overflow:hidden}
+    .bar>span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#188653,#5bd493)}
+    .mobile-top{display:none}
+    @media(max-width:1000px){.sidebar{width:220px}.main{margin-left:220px}}
+    @media(max-width:760px){.sidebar{display:none}.main{margin:0}.mobile-top{display:flex}.content{padding:20px!important}.hero-grid{grid-template-columns:1fr!important}.stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}.roles{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+    @media(max-width:460px){.stats,.roles{grid-template-columns:1fr!important}.top-actions .desktop-label{display:none}.brand-sub{display:none}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar fixed inset-y-0 left-0 z-30 flex flex-col px-5 py-6">
+    <a href="./" class="flex items-center gap-3 px-2 mb-9">
+      <img src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" alt="AMANAH logo" class="h-11 w-11 rounded-full border border-yellow-500/60 object-contain bg-black" onerror="this.style.display='none'">
+      <div><div class="brand text-lg font-extrabold tracking-[.19em]">AMANAH</div><div class="text-[9px] uppercase tracking-[.22em] text-yellow-500 brand-sub">Unilevel Management</div></div>
+    </a>
+    <div class="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.2em] text-slate-600">Workspace</div>
+    <nav class="space-y-1">
+      <a class="nav-link active" href="#overview"><span>▦</span> Overview</a>
+      <a class="nav-link" href="#access"><span>♙</span> Account access</a>
+      <a class="nav-link" href="#modules"><span>▤</span> System modules</a>
+      <a class="nav-link" href="#unilevel"><span>⌘</span> Unilevel structure</a>
+    </nav>
+    <div class="mt-8 mb-3 px-3 text-[10px] font-bold uppercase tracking-[.2em] text-slate-600">Resources</div>
+    <a class="nav-link" href="../index.html"><span>↗</span> Corporate website</a>
+    <div class="mt-auto glass rounded-2xl p-4">
+      <div class="flex items-center gap-2 text-xs font-bold text-yellow-200"><span class="h-2 w-2 rounded-full bg-emerald-400"></span> Portal foundation</div>
+      <p class="mt-2 text-[11px] leading-relaxed muted">Dashboard interface is ready for secure login and live Supabase data integration.</p>
+      <div class="mt-3 text-[10px] uppercase tracking-wider text-slate-600">AMANAH DMC · Unilevel</div>
+    </div>
+  </aside>
+
+  <main class="main min-h-screen">
+    <div class="mobile-top items-center justify-between border-b border-yellow-500/10 px-5 py-4">
+      <div class="flex items-center gap-2"><img src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" class="h-9 w-9 rounded-full border border-yellow-500/50" alt="AMANAH"><span class="brand font-extrabold tracking-[.16em]">AMANAH</span></div>
+      <a href="../index.html" class="text-xs text-yellow-300">Corporate site ↗</a>
+    </div>
+    <div class="content mx-auto max-w-[1500px] p-8 xl:p-10">
+      <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div><div class="mb-2 text-[10px] font-bold uppercase tracking-[.24em] text-emerald-400">Distribution & Marketing Corporation</div><h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Unilevel <span class="gold-text">Management Portal</span></h1><p class="mt-2 text-sm muted">A connected workspace for members, sales and performance.</p></div>
+        <div class="top-actions flex items-center gap-3"><span class="pill rounded-full px-3 py-2 text-[10px] font-bold uppercase tracking-wider">● System preview</span><a href="../index.html" class="desktop-label rounded-xl border border-white/10 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:border-yellow-500/40 hover:text-yellow-200">Visit website ↗</a></div>
+      </header>
+
+      <section id="overview" class="hero-grid glass mb-7 grid grid-cols-[1.45fr_.8fr] gap-6 overflow-hidden rounded-3xl p-6 md:p-8">
+        <div class="relative z-10 flex flex-col justify-center">
+          <div class="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.16em] text-emerald-300"><span>✦</span> One team. One direction. Shared growth.</div>
+          <h2 class="max-w-2xl text-3xl font-extrabold leading-tight sm:text-4xl">Welcome to the <span class="gold-text">AMANAH</span><br>business network.</h2>
+          <p class="mt-4 max-w-xl text-sm leading-7 text-slate-400">Manage your unilevel organization through one secure platform. Follow referrals, monitor product sales and keep commission records organized.</p>
+          <div class="mt-6 flex flex-wrap gap-3"><a href="#access" class="btn-gold rounded-xl px-5 py-3 text-xs">Choose account access <span class="ml-2">→</span></a><a href="#unilevel" class="rounded-xl border border-white/10 px-5 py-3 text-xs font-bold text-slate-300 hover:border-emerald-500/40">Explore unilevel model</a></div>
+        </div>
+        <div class="relative hidden min-h-[220px] items-center justify-center md:flex">
+          <div class="absolute h-56 w-56 rounded-full border border-yellow-500/20"></div><div class="absolute h-40 w-40 rounded-full border border-emerald-500/20"></div>
+          <div class="relative flex h-24 w-24 flex-col items-center justify-center rounded-3xl border border-yellow-400/40 bg-[#171a10] shadow-2xl shadow-yellow-900/20"><span class="text-2xl text-yellow-300">✦</span><span class="mt-1 text-[9px] font-extrabold tracking-[.2em]">AMANAH</span></div>
+          <span class="absolute left-[8%] top-[18%] rounded-full border border-white/10 bg-black/60 px-3 py-2 text-[10px] text-emerald-200">Members</span>
+          <span class="absolute right-[5%] top-[22%] rounded-full border border-white/10 bg-black/60 px-3 py-2 text-[10px] text-yellow-200">Sales</span>
+          <span class="absolute bottom-[12%] left-[20%] rounded-full border border-white/10 bg-black/60 px-3 py-2 text-[10px] text-emerald-200">Referrals</span>
+          <span class="absolute bottom-[10%] right-[12%] rounded-full border border-white/10 bg-black/60 px-3 py-2 text-[10px] text-yellow-200">Commissions</span>
+        </div>
+      </section>
+
+      <section class="mb-8">
+        <div class="mb-4 flex items-end justify-between"><div><h3 class="text-base font-bold">Organization snapshot</h3><p class="mt-1 text-xs muted">Live figures will appear after database connection.</p></div><span class="text-[10px] uppercase tracking-wider text-slate-600">Awaiting data</span></div>
+        <div class="stats grid grid-cols-4 gap-4">
+          <article class="stat-card"><div class="flex items-center justify-between"><span class="text-xs muted">Total members</span><span class="stat-icon">♙</span></div><div class="mt-5 text-3xl font-extrabold">—</div><div class="mt-1 text-[10px] muted">Member records</div></article>
+          <article class="stat-card"><div class="flex items-center justify-between"><span class="text-xs muted">Product sales</span><span class="stat-icon">▤</span></div><div class="mt-5 text-3xl font-extrabold">₱ —</div><div class="mt-1 text-[10px] muted">Verified orders</div></article>
+          <article class="stat-card"><div class="flex items-center justify-between"><span class="text-xs muted">Commissions</span><span class="stat-icon">₱</span></div><div class="mt-5 text-3xl font-extrabold">₱ —</div><div class="mt-1 text-[10px] muted">Recorded payouts</div></article>
+          <article class="stat-card"><div class="flex items-center justify-between"><span class="text-xs muted">Pending withdrawals</span><span class="stat-icon">⇧</span></div><div class="mt-5 text-3xl font-extrabold">—</div><div class="mt-1 text-[10px] muted">For admin review</div></article>
+        </div>
+      </section>
+
+      <section id="access" class="mb-8">
+        <div class="mb-4"><h3 class="text-base font-bold">Select your account portal</h3><p class="mt-1 text-xs muted">Each account type will have its own permissions and dashboard.</p></div>
+        <div class="roles grid grid-cols-3 gap-4">
+          <button class="role-card rounded-2xl p-5 text-left" data-role="Administrator" type="button"><div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-500/10 text-xl text-yellow-300">♜</div><div class="font-bold">Administrator</div><p class="mt-1 text-xs leading-5 muted">System settings, users, reports and approvals.</p><div class="mt-4 text-[10px] font-bold uppercase tracking-wider text-yellow-300">Select portal →</div></button>
+          <button class="role-card rounded-2xl p-5 text-left" data-role="Marketing Officer" type="button"><div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-xl text-emerald-300">♧</div><div class="font-bold">Marketing Officer</div><p class="mt-1 text-xs leading-5 muted">Team performance, referrals and commissions.</p><div class="mt-4 text-[10px] font-bold uppercase tracking-wider text-yellow-300">Select portal →</div></button>
+          <button class="role-card rounded-2xl p-5 text-left" data-role="Branch Operator" type="button"><div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-500/10 text-xl text-yellow-300">⌂</div><div class="font-bold">Branch Operator</div><p class="mt-1 text-xs leading-5 muted">Branch orders, sales and inventory.</p><div class="mt-4 text-[10px] font-bold uppercase tracking-wider text-yellow-300">Select portal →</div></button>
+          <button class="role-card rounded-2xl p-5 text-left" data-role="Mobile Stockist" type="button"><div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-xl text-emerald-300">▣</div><div class="font-bold">Mobile Stockist</div><p class="mt-1 text-xs leading-5 muted">Personal stock, customer orders and reorders.</p><div class="mt-4 text-[10px] font-bold uppercase tracking-wider text-yellow-300">Select portal →</div></button>
+          <button class="role-card rounded-2xl p-5 text-left" data-role="Distributor" type="button"><div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-500/10 text-xl text-yellow-300">♙</div><div class="font-bold">Distributor</div><p class="mt-1 text-xs leading-5 muted">Referral network, purchases and wallet.</p><div class="mt-4 text-[10px] font-bold uppercase tracking-wider text-yellow-300">Select portal →</div></button>
+          <div class="rounded-2xl border border-dashed border-emerald-500/25 bg-emerald-500/[.04] p-5"><div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-xl text-emerald-300">⌘</div><div class="font-bold text-emerald-200">Unilevel network</div><p class="mt-1 text-xs leading-5 muted">A sponsor-based structure with multiple referral levels.</p><a href="#unilevel" class="mt-4 inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-300">View structure ↓</a></div>
+        </div>
+        <div id="role-message" class="mt-4 hidden rounded-xl border border-yellow-500/20 bg-yellow-500/[.06] p-4 text-xs text-yellow-100" role="status" aria-live="polite"></div>
+      </section>
+
+      <section id="modules" class="mb-8">
+        <div class="mb-4"><h3 class="text-base font-bold">Core system modules</h3><p class="mt-1 text-xs muted">The main tools planned for the AMANAH platform.</p></div>
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div class="glass rounded-2xl p-4"><div class="text-xl text-yellow-300">♙</div><div class="mt-3 text-sm font-bold">Member directory</div><p class="mt-1 text-[11px] leading-5 muted">Registration, sponsor and account status.</p></div>
+          <div class="glass rounded-2xl p-4"><div class="text-xl text-emerald-300">⌘</div><div class="mt-3 text-sm font-bold">Genealogy tree</div><p class="mt-1 text-[11px] leading-5 muted">Direct referrals and upstream relationships.</p></div>
+          <div class="glass rounded-2xl p-4"><div class="text-xl text-yellow-300">₱</div><div class="mt-3 text-sm font-bold">Commission ledger</div><p class="mt-1 text-[11px] leading-5 muted">Level-based earnings and transaction history.</p></div>
+          <div class="glass rounded-2xl p-4"><div class="text-xl text-emerald-300">▤</div><div class="mt-3 text-sm font-bold">Sales & orders</div><p class="mt-1 text-[11px] leading-5 muted">Product purchases, payment and fulfillment.</p></div>
+        </div>
+      </section>
+
+      <section id="unilevel" class="glass rounded-3xl p-6 md:p-7">
+        <div class="flex flex-wrap items-start justify-between gap-3"><div><div class="text-[10px] font-bold uppercase tracking-[.2em] text-emerald-400">Compensation model</div><h3 class="mt-2 text-xl font-extrabold">Simple <span class="gold-text">Unilevel</span> structure</h3><p class="mt-2 max-w-2xl text-xs leading-6 muted">Every member may refer multiple people directly. Each purchase can be traced through the sponsor chain according to the commission rules configured by the administrator.</p></div><span class="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300">No binary · No matrix</span></div>
+        <div class="mt-6 grid gap-3 sm:grid-cols-4">
+          <div class="rounded-xl border border-yellow-500/20 bg-yellow-500/[.05] p-4 text-center"><div class="text-[10px] uppercase tracking-wider muted">Level 1</div><div class="mt-1 font-bold text-yellow-200">Direct sponsor</div></div>
+          <div class="rounded-xl border border-white/10 bg-white/[.02] p-4 text-center"><div class="text-[10px] uppercase tracking-wider muted">Level 2+</div><div class="mt-1 font-bold">Upline sponsors</div></div>
+          <div class="rounded-xl border border-white/10 bg-white/[.02] p-4 text-center"><div class="text-[10px] uppercase tracking-wider muted">Any width</div><div class="mt-1 font-bold">Multiple referrals</div></div>
+          <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/[.05] p-4 text-center"><div class="text-[10px] uppercase tracking-wider muted">Commission</div><div class="mt-1 font-bold text-emerald-200">Rules-based</div></div>
+        </div>
+      </section>
+      <footer class="flex flex-wrap justify-between gap-2 py-7 text-[10px] text-slate-600"><span>© AMANAH Distribution & Marketing Corporation</span><span>Unilevel Management Portal · Interface preview</span></footer>
+    </div>
+  </main>
+</div>
+<script>
+  // Role selection is a visual preview only. Secure Supabase authentication is a separate implementation step.
+  document.querySelectorAll('[data-role]').forEach(card=>{
+    card.addEventListener('click',()=>{
+      document.querySelectorAll('[data-role]').forEach(item=>item.classList.remove('selected'));
+      card.classList.add('selected');
+      const message=document.getElementById('role-message');
+      message.classList.remove('hidden');
+      message.textContent=card.dataset.role+' portal selected. Secure sign-in and role permissions will be connected in the authentication phase.';
+    });
+  });
+  document.querySelectorAll('.nav-link').forEach(link=>{
+    link.addEventListener('click',()=>{
+      document.querySelectorAll('.nav-link').forEach(item=>item.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
