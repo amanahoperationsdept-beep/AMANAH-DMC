@@ -95,6 +95,34 @@
                 <div class="flex items-center justify-between"><h5 class="font-bold">My Cart</h5><span id="cartCount" class="text-xs muted">0 items</span></div>
                 <div id="cartItems" class="mt-3 space-y-2"><p class="text-xs muted">Your cart is empty.</p></div>
                 <div class="mt-3 flex items-center justify-between border-t border-white/10 pt-3"><span class="text-sm font-semibold">Cart total</span><strong id="cartTotal" class="text-lg text-yellow-300">₱0.00</strong></div>
+                <div class="mt-5 border-t border-white/10 pt-4">
+                  <h5 class="font-bold">Order destination</h5>
+                  <label class="mt-3 block text-xs muted">Choose where to send your order
+                    <select id="orderDestination" class="mt-2 w-full rounded-lg px-3 py-3">
+                      <option value="">Select destination</option>
+                      <option value="main_branch">Main Branch</option>
+                      <option value="branch_operator">Branch Operator</option>
+                      <option value="mobile_stockist">Mobile Stockist</option>
+                    </select>
+                  </label>
+                  <div id="destinationFormFields" class="hide mt-3 space-y-3">
+                    <label id="destinationContactLabel" class="block text-xs muted">Contact person
+                      <input id="destinationContact" maxlength="120" placeholder="Full name of contact person" class="mt-2 w-full rounded-lg px-3 py-3">
+                    </label>
+                    <label class="block text-xs muted">Contact number
+                      <input id="destinationPhone" maxlength="40" type="tel" placeholder="Mobile number" class="mt-2 w-full rounded-lg px-3 py-3">
+                    </label>
+                    <label class="block text-xs muted">Complete delivery address
+                      <textarea id="destinationAddress" maxlength="500" rows="3" placeholder="House/Unit, street, barangay, city/municipality, province" class="mt-2 w-full rounded-lg px-3 py-3"></textarea>
+                    </label>
+                  </div>
+                  <div id="stockistFields" class="hide mt-3">
+                    <label class="block text-xs muted">Select registered Mobile Stockist
+                      <select id="stockistSelect" class="mt-2 w-full rounded-lg px-3 py-3"><option value="">Loading stockists…</option></select>
+                    </label>
+                    <p class="mt-2 text-[11px] muted">Choose the stockist by registered name. No address form is required.</p>
+                  </div>
+                </div>
                 <button id="submitMemberOrder" type="button" class="gold mt-4 w-full rounded-lg px-4 py-3 font-extrabold">Submit order</button>
                 <p id="orderMessage" role="status" class="mt-3 text-xs muted">Submitting an order records your request only. No payment is collected online.</p>
               </section>
@@ -317,6 +345,34 @@
     renderCart();
   });
 
+  document.getElementById('orderDestination').addEventListener('change', async event => {
+    const category = event.target.value;
+    const formFields = document.getElementById('destinationFormFields');
+    const stockistFields = document.getElementById('stockistFields');
+    formFields.classList.toggle('hide', !['main_branch','branch_operator'].includes(category));
+    stockistFields.classList.toggle('hide', category !== 'mobile_stockist');
+    if (category === 'mobile_stockist') await loadMobileStockists();
+  });
+
+  let stockistsLoaded = false;
+  async function loadMobileStockists() {
+    const select = document.getElementById('stockistSelect');
+    select.innerHTML = '<option value="">Loading registered stockists…</option>';
+    const {data, error} = await client.rpc('list_active_mobile_stockists');
+    if (error) {
+      select.innerHTML = '<option value="">Could not load stockists</option>';
+      document.getElementById('orderMessage').textContent = 'Mobile Stockists could not be loaded. Please ask the administrator to apply the destination SQL migration.';
+      return;
+    }
+    const stockists = Array.isArray(data) ? data : [];
+    select.innerHTML = '<option value="">Choose a Mobile Stockist</option>' + stockists.map(person =>
+      '<option value="' + safeCartText(person.id) + '">' + safeCartText(person.full_name || 'Unnamed stockist') +
+      (person.member_code ? ' · ' + safeCartText(person.member_code) : '') + '</option>'
+    ).join('');
+    stockistsLoaded = true;
+    if (!stockists.length) select.innerHTML = '<option value="">No active Mobile Stockists found</option>';
+  }
+
   document.getElementById('submitMemberOrder').addEventListener('click', async () => {
     const button = document.getElementById('submitMemberOrder');
     const note = document.getElementById('orderMessage');
@@ -332,13 +388,38 @@
     button.textContent = 'Submitting order…';
     note.textContent = 'Verifying product availability and official role-based prices…';
     try {
-      const {data, error} = await client.rpc('submit_member_order', {p_items: items});
+      const category = document.getElementById('orderDestination').value;
+      if (!category) throw new Error('Please choose an order destination.');
+      const stockistId = document.getElementById('stockistSelect').value;
+      const contact = document.getElementById('destinationContact').value.trim();
+      const phone = document.getElementById('destinationPhone').value.trim();
+      const address = document.getElementById('destinationAddress').value.trim();
+      if (category === 'mobile_stockist' && !stockistId) throw new Error('Please select a Mobile Stockist by name.');
+      if (['main_branch','branch_operator'].includes(category) && (!contact || !phone || !address)) {
+        throw new Error('Please complete the contact person, contact number, and delivery address.');
+      }
+      const {data, error} = await client.rpc('submit_member_order', {
+        p_items: items,
+        p_destination_category: category,
+        p_destination_member_id: category === 'mobile_stockist' ? stockistId : null,
+        p_contact_person: category === 'mobile_stockist' ? null : contact,
+        p_contact_number: category === 'mobile_stockist' ? null : phone,
+        p_address: category === 'mobile_stockist' ? null : address
+      });
       if (error) throw error;
       const result = typeof data === 'string' ? JSON.parse(data) : data;
       cart.clear();
       renderCart();
       note.textContent = 'Order submitted successfully. Order number: ' + (result.order_number || 'Created') +
+        '. Destination: ' + (result.destination_name || 'Selected destination') +
         '. Total: ' + formatMoney(result.total) + '. Status: Submitted. No payment was collected.';
+      document.getElementById('orderDestination').value = '';
+      document.getElementById('destinationFormFields').classList.add('hide');
+      document.getElementById('stockistFields').classList.add('hide');
+      document.getElementById('destinationContact').value = '';
+      document.getElementById('destinationPhone').value = '';
+      document.getElementById('destinationAddress').value = '';
+      document.getElementById('stockistSelect').value = '';
       const {data: userData} = await client.auth.getUser();
       if (userData?.user) await loadDistributorHome(userData.user.id);
     } catch (error) {
@@ -397,7 +478,10 @@
         '<span class="rounded-full border border-emerald-500/30 px-2 py-1 text-[11px] text-emerald-300">' + esc(order.status || 'Submitted') + '</span></div>' +
         '<div class="mt-3 space-y-2 border-t border-white/10 pt-3">' + itemHtml + '</div>' +
         '<div class="mt-3 flex items-center justify-between border-t border-white/10 pt-3"><span class="text-xs muted">Order total</span><strong class="text-lg text-yellow-300">' + formatMoney(order.total) + '</strong></div>' +
-        '<p class="mt-2 text-[11px] muted">Payment: ' + esc(order.payment_method || 'Not recorded') + '</p></article>';
+        '<div class="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-950/20 p-3"><p class="text-xs font-bold text-emerald-300">Destination: ' + esc(order.destination_name || order.destination_category || 'Not recorded') + '</p>' +
+        (order.destination_contact_person ? '<p class="mt-1 text-xs muted">Contact: ' + esc(order.destination_contact_person) + ' · ' + esc(order.destination_contact_number || '') + '</p>' : '') +
+        (order.destination_address ? '<p class="mt-1 text-xs muted">Address: ' + esc(order.destination_address) + '</p>' : '') +
+        '</div><p class="mt-2 text-[11px] muted">Payment: ' + esc(order.payment_method || 'Not recorded') + '</p></article>';
     }).join('');
     note.textContent = orders.length + ' recent order(s) loaded. This screen is read-only; order approval and payment handling are not enabled yet.';
   }
