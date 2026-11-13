@@ -359,6 +359,9 @@
     const productTools = document.getElementById('dashboardProductsSection');
     const referrals = document.getElementById('dashboardReferralsSection');
     const history = document.getElementById('dashboardHistorySection');
+    const distributorSummary = distributor?.children[1];
+    const distributorStatus = distributor?.children[3];
+    const distributorLists = distributor?.children[4];
     const overview = section === 'overview';
     [memberCodeStatus, portalAccess, roleModules, distributor, admin, genealogy, commissions].forEach(node => node?.classList.add('hide'));
     if (section === 'overview') {
@@ -366,20 +369,36 @@
       portalAccess?.classList.remove('hide');
       roleModules?.classList.toggle('hide', !roleModules.innerHTML.trim());
       distributor?.classList.remove('hide');
+      distributorSummary?.classList.remove('hide');
+      distributorStatus?.classList.remove('hide');
+      distributorLists?.classList.remove('hide');
       productTools?.classList.remove('hide');
       referrals?.classList.remove('hide');
       history?.classList.remove('hide');
       document.getElementById('distributorCatalog').classList.add('hide');
     } else if (section === 'products') {
       distributor?.classList.remove('hide');
+      distributorSummary?.classList.add('hide');
+      distributorStatus?.classList.add('hide');
+      distributorLists?.classList.add('hide');
       productTools?.classList.remove('hide');
       document.getElementById('distributorCatalog').classList.remove('hide');
       loadDistributorCatalog();
     } else if (section === 'referrals') {
       distributor?.classList.remove('hide');
+      distributorSummary?.classList.add('hide');
+      distributorStatus?.classList.add('hide');
+      productTools?.classList.add('hide');
+      distributorLists?.classList.remove('hide');
       referrals?.classList.remove('hide');
+      history?.classList.add('hide');
     } else if (section === 'history') {
       distributor?.classList.remove('hide');
+      distributorSummary?.classList.add('hide');
+      distributorStatus?.classList.add('hide');
+      productTools?.classList.add('hide');
+      distributorLists?.classList.remove('hide');
+      referrals?.classList.add('hide');
       history?.classList.remove('hide');
     } else if (section === 'genealogy') {
       genealogy?.classList.remove('hide');
