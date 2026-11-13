@@ -91,6 +91,12 @@
               <div class="mb-3 flex items-center justify-between gap-3"><div><h4 class="font-bold">AMANAH Product Catalog</h4><p class="text-xs muted">Your account is signed in as Distributor. Distributor prices apply.</p></div><button id="closeProductCatalog" type="button" class="rounded-lg border border-white/15 px-3 py-2 text-xs">Close</button></div>
               <p id="catalogMessage" role="status" class="mb-3 text-xs muted">Loading products…</p>
               <div id="catalogProducts" class="grid gap-3 sm:grid-cols-2"></div>
+              <section id="shoppingCart" class="mt-5 rounded-xl border border-yellow-500/25 bg-black/20 p-4">
+                <div class="flex items-center justify-between"><h5 class="font-bold">My Cart</h5><span id="cartCount" class="text-xs muted">0 items</span></div>
+                <div id="cartItems" class="mt-3 space-y-2"><p class="text-xs muted">Your cart is empty.</p></div>
+                <div class="mt-3 flex items-center justify-between border-t border-white/10 pt-3"><span class="text-sm font-semibold">Cart total</span><strong id="cartTotal" class="text-lg text-yellow-300">₱0.00</strong></div>
+                <p class="mt-2 text-xs muted">Add products here. Order submission and payment will be enabled after the cart is tested.</p>
+              </section>
             </section>
           </div>
           <p id="homeDataMessage" role="status" class="text-xs muted">Loading your account summary…</p>
@@ -225,6 +231,7 @@
     }
     const money = value => '₱' + Number(value || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    window.amanahCatalogProducts = new Map(data.map(product => [product.id, product]));
     list.innerHTML = data.map(product => `
       <article class="overflow-hidden rounded-xl border border-white/10 bg-black/20">
         ${product.image_path && String(product.image_path).startsWith('https://bqgxvnrgjmngezknqhsl.supabase.co/') ? `<img src="${safe(product.image_path)}" alt="${safe(product.name)}" loading="lazy" class="h-48 w-full bg-white object-contain p-2" onerror="this.style.display='none'">` : ''}
@@ -234,10 +241,67 @@
         <p class="mt-1 text-xs uppercase tracking-wider text-emerald-300">Your Distributor price</p>
         <p class="mt-1 text-2xl font-black text-yellow-300">${money(product.distributor_price)}</p>
         ${product.description ? `<p class="mt-2 text-xs muted">${safe(product.description)}</p>` : ''}
+        <button type="button" data-add-product="${safe(product.id)}" class="gold mt-4 w-full rounded-lg px-3 py-2 text-sm font-bold">Add to cart</button>
         </div>
       </article>`).join('');
     note.textContent = data.length + ' active products. Distributor prices are displayed for your signed-in role.';
+    renderCart();
   }
+
+  const cart = new Map();
+  const formatMoney = value => '₱' + Number(value || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  function renderCart() {
+    const itemsNode = document.getElementById('cartItems');
+    if (!itemsNode) return;
+    const items = Array.from(cart.values());
+    const count = items.reduce((sum, item) => sum + item.quantity, 0);
+    const total = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+    document.getElementById('cartCount').textContent = count + (count === 1 ? ' item' : ' items');
+    document.getElementById('cartTotal').textContent = formatMoney(total);
+    if (!items.length) {
+      itemsNode.innerHTML = '<p class="text-xs muted">Your cart is empty.</p>';
+      return;
+    }
+    itemsNode.innerHTML = items.map(item => `
+      <div class="flex items-center justify-between gap-3 rounded-lg border border-white/10 p-3">
+        <div class="min-w-0"><p class="truncate text-sm font-semibold">${safeCartText(item.name)}</p><p class="text-xs muted">${formatMoney(item.price)} each</p></div>
+        <div class="flex items-center gap-2">
+          <button type="button" data-cart-action="minus" data-cart-id="${item.id}" class="rounded border border-white/20 px-2 py-1" aria-label="Decrease quantity">−</button>
+          <span class="w-5 text-center text-sm">${item.quantity}</span>
+          <button type="button" data-cart-action="plus" data-cart-id="${item.id}" class="rounded border border-white/20 px-2 py-1" aria-label="Increase quantity">+</button>
+          <button type="button" data-cart-action="remove" data-cart-id="${item.id}" class="rounded border border-red-400/30 px-2 py-1 text-red-300" aria-label="Remove item">×</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function safeCartText(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  }
+
+  document.getElementById('catalogProducts').addEventListener('click', event => {
+    const button = event.target.closest('[data-add-product]');
+    if (!button) return;
+    const product = window.amanahCatalogProducts?.get(button.dataset.addProduct);
+    if (!product) return;
+    const existing = cart.get(product.id);
+    if (existing) existing.quantity += 1;
+    else cart.set(product.id, {id: product.id, name: product.name, price: Number(product.distributor_price), quantity: 1});
+    renderCart();
+    button.textContent = 'Added ✓';
+    setTimeout(() => { if (button.isConnected) button.textContent = 'Add to cart'; }, 900);
+  });
+
+  document.getElementById('cartItems').addEventListener('click', event => {
+    const button = event.target.closest('[data-cart-action]');
+    if (!button) return;
+    const item = cart.get(button.dataset.cartId);
+    if (!item) return;
+    if (button.dataset.cartAction === 'plus') item.quantity += 1;
+    if (button.dataset.cartAction === 'minus') item.quantity -= 1;
+    if (button.dataset.cartAction === 'remove' || item.quantity <= 0) cart.delete(item.id);
+    renderCart();
+  });
 
   async function loadDistributorHome(memberId) {
     const note = document.getElementById('homeDataMessage');
