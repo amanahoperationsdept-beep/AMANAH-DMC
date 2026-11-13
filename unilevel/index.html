@@ -82,11 +82,16 @@
           <div class="rounded-xl border border-yellow-500/20 p-4">
             <h4 class="font-bold">Distributor tools</h4>
             <div class="mt-3 grid gap-2 sm:grid-cols-2">
-              <div class="rounded-lg bg-black/20 px-3 py-3 text-sm">Product catalog <span class="block text-xs muted">Coming next</span></div>
+              <button id="openProductCatalog" type="button" class="rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-3 text-left text-sm font-semibold">Product catalog <span class="block text-xs font-normal muted">View Distributor prices</span></button>
               <div class="rounded-lg bg-black/20 px-3 py-3 text-sm">Place an order <span class="block text-xs muted">Coming next</span></div>
               <div class="rounded-lg bg-black/20 px-3 py-3 text-sm">My referrals <span class="block text-xs muted">Coming next</span></div>
               <div class="rounded-lg bg-black/20 px-3 py-3 text-sm">My commissions & wallet <span class="block text-xs muted">Summary shown above</span></div>
             </div>
+            <section id="distributorCatalog" class="hide mt-5">
+              <div class="mb-3 flex items-center justify-between gap-3"><div><h4 class="font-bold">AMANAH Product Catalog</h4><p class="text-xs muted">Your account is signed in as Distributor. Distributor prices apply.</p></div><button id="closeProductCatalog" type="button" class="rounded-lg border border-white/15 px-3 py-2 text-xs">Close</button></div>
+              <p id="catalogMessage" role="status" class="mb-3 text-xs muted">Loading products…</p>
+              <div id="catalogProducts" class="grid gap-3 sm:grid-cols-2"></div>
+            </section>
           </div>
           <p id="homeDataMessage" role="status" class="text-xs muted">Loading your account summary…</p>
         </section>
@@ -177,6 +182,44 @@
       document.getElementById('distributorDashboard').classList.add('hide');
       document.getElementById('roleModules').classList.remove('hide');
     }
+  }
+
+  document.getElementById('openProductCatalog').addEventListener('click', async () => {
+    document.getElementById('distributorCatalog').classList.remove('hide');
+    await loadDistributorCatalog();
+  });
+  document.getElementById('closeProductCatalog').addEventListener('click', () => {
+    document.getElementById('distributorCatalog').classList.add('hide');
+  });
+
+  async function loadDistributorCatalog() {
+    const note = document.getElementById('catalogMessage');
+    const list = document.getElementById('catalogProducts');
+    note.textContent = 'Loading official product prices…';
+    list.innerHTML = '';
+    const {data, error} = await client.from('products')
+      .select('id,name,description,srp,distributor_price')
+      .eq('is_active', true)
+      .order('name');
+    if (error) {
+      note.textContent = 'Products could not be loaded. Please check the product table permissions.';
+      return;
+    }
+    if (!data || data.length === 0) {
+      note.textContent = 'No active products have been added yet. The administrator must apply the product catalog setup.';
+      return;
+    }
+    const money = value => '₱' + Number(value || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    list.innerHTML = data.map(product => `
+      <article class="rounded-xl border border-white/10 bg-black/20 p-4">
+        <p class="text-sm font-bold">${safe(product.name)}</p>
+        <p class="mt-2 text-xs muted">SRP: <span class="line-through">${money(product.srp)}</span></p>
+        <p class="mt-1 text-xs uppercase tracking-wider text-emerald-300">Your Distributor price</p>
+        <p class="mt-1 text-2xl font-black text-yellow-300">${money(product.distributor_price)}</p>
+        ${product.description ? `<p class="mt-2 text-xs muted">${safe(product.description)}</p>` : ''}
+      </article>`).join('');
+    note.textContent = data.length + ' active products. Distributor prices are displayed for your signed-in role.';
   }
 
   async function loadDistributorHome(memberId) {
