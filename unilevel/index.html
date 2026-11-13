@@ -49,7 +49,7 @@
     body.member-mode #memberPanel input,body.member-mode #memberPanel select,body.member-mode #memberPanel textarea{color:#fff!important;background:#151c17!important;border-color:#68766c!important}
     body.member-mode #memberPanel input::placeholder,body.member-mode #memberPanel textarea::placeholder{color:#b7c1b9!important;opacity:1}
     body.member-mode #memberPanel button:not(.gold){color:#f5f6ef}
-    .dashboard-nav{position:sticky;top:78px;z-index:30;background:linear-gradient(100deg,#0b1710 0%,#1b3023 55%,#242a26 100%);box-shadow:0 8px 24px rgba(0,0,0,.28)}
+    .dashboard-nav{position:sticky;top:0;z-index:30;background:linear-gradient(100deg,#0b1710 0%,#1b3023 55%,#242a26 100%);box-shadow:0 8px 24px rgba(0,0,0,.28)}
     .dashboard-tab{min-height:42px;padding:9px 16px;border:1px solid rgba(215,185,91,.38);border-radius:999px;background:linear-gradient(120deg,#303a33,#171e19);color:#f7f4e8!important;font-size:13px;font-weight:750;white-space:nowrap}
     .dashboard-tab:hover,.dashboard-tab:focus-visible{border-color:#e2c36b;background:linear-gradient(120deg,#28563a,#3d493f);outline:2px solid #d9b85c;outline-offset:2px}
     .dashboard-tab.is-active{background:linear-gradient(110deg,#dfc36f,#b18a35);color:#101710!important;border-color:#f0d889}
@@ -109,8 +109,7 @@
       </div>
 
       <div id="memberPanel" class="hide">
-        <div class="flex items-start justify-between gap-3"><div><p class="text-xs uppercase tracking-widest text-emerald-300">Signed in</p><h2 id="memberName" class="mt-1 text-2xl font-extrabold">Member</h2><p id="memberRole" class="mt-1 text-sm text-yellow-300"></p></div><button id="signOut" class="rounded-lg border border-white/15 px-3 py-2 text-xs">Sign out</button></div>
-        <nav id="dashboardNav" aria-label="Dashboard sections" class="dashboard-nav mt-5 flex flex-wrap gap-2 rounded-2xl border border-emerald-500/20 p-3">
+        <nav id="dashboardNav" aria-label="Dashboard sections" class="dashboard-nav mb-5 flex flex-wrap gap-2 rounded-2xl border border-emerald-500/20 p-3">
           <button type="button" data-dash-nav="overview" class="dashboard-tab is-active">Overview</button>
           <button type="button" data-dash-nav="products" class="dashboard-tab">Products &amp; Orders</button>
           <button type="button" data-dash-nav="referrals" class="dashboard-tab" id="navReferrals">My Referrals</button>
@@ -119,6 +118,8 @@
           <button type="button" data-dash-nav="commissions" class="dashboard-tab" id="navCommissions">PV Commissions</button>
           <button type="button" data-dash-nav="admin-orders" class="dashboard-tab hide" id="navAdminOrders">Submitted Orders</button>
         </nav>
+        <div class="flex items-start justify-between gap-3"><div><p class="text-xs uppercase tracking-widest text-emerald-300">Signed in</p><h2 id="memberName" class="mt-1 text-2xl font-extrabold">Member</h2><p id="memberRole" class="mt-1 text-sm text-yellow-300"></p></div><button id="signOut" class="rounded-lg border border-white/15 px-3 py-2 text-xs">Sign out</button></div>
+
         <div class="mt-6 grid grid-cols-2 gap-3">
           <div class="rounded-xl bg-black/30 p-4"><div class="text-xs muted">Member code</div><div id="memberCode" class="mt-2 font-bold">—</div></div>
           <div class="rounded-xl bg-black/30 p-4"><div class="text-xs muted">Account status</div><div id="memberStatus" class="mt-2 font-bold text-emerald-300">Active</div></div>
@@ -348,28 +349,52 @@
 
   const dashboardNav = document.getElementById('dashboardNav');
   function showDashboardSection(section) {
-    const targets = {
-      overview: document.getElementById('distributorDashboard'),
-      products: document.getElementById('dashboardProductsSection'),
-      referrals: document.getElementById('dashboardReferralsSection'),
-      history: document.getElementById('dashboardHistorySection'),
-      genealogy: document.getElementById('memberGenealogySection'),
-      commissions: document.getElementById('memberCommissionSection'),
-      'admin-orders': document.getElementById('adminDashboard')
-    };
-    if (section === 'products') {
+    const memberCodeStatus = document.querySelector('#memberPanel > .mt-6.grid.grid-cols-2');
+    const portalAccess = memberCodeStatus?.nextElementSibling;
+    const roleModules = document.getElementById('roleModules');
+    const distributor = document.getElementById('distributorDashboard');
+    const admin = document.getElementById('adminDashboard');
+    const genealogy = document.getElementById('memberGenealogySection');
+    const commissions = document.getElementById('memberCommissionSection');
+    const productTools = document.getElementById('dashboardProductsSection');
+    const referrals = document.getElementById('dashboardReferralsSection');
+    const history = document.getElementById('dashboardHistorySection');
+    const overview = section === 'overview';
+    [memberCodeStatus, portalAccess, roleModules, distributor, admin, genealogy, commissions].forEach(node => node?.classList.add('hide'));
+    if (section === 'overview') {
+      memberCodeStatus?.classList.remove('hide');
+      portalAccess?.classList.remove('hide');
+      roleModules?.classList.toggle('hide', !roleModules.innerHTML.trim());
+      distributor?.classList.remove('hide');
+      productTools?.classList.remove('hide');
+      referrals?.classList.remove('hide');
+      history?.classList.remove('hide');
+      document.getElementById('distributorCatalog').classList.add('hide');
+    } else if (section === 'products') {
+      distributor?.classList.remove('hide');
+      productTools?.classList.remove('hide');
       document.getElementById('distributorCatalog').classList.remove('hide');
       loadDistributorCatalog();
+    } else if (section === 'referrals') {
+      distributor?.classList.remove('hide');
+      referrals?.classList.remove('hide');
+    } else if (section === 'history') {
+      distributor?.classList.remove('hide');
+      history?.classList.remove('hide');
+    } else if (section === 'genealogy') {
+      genealogy?.classList.remove('hide');
+      loadMemberGenealogy();
+    } else if (section === 'commissions') {
+      commissions?.classList.remove('hide');
+      loadMemberCommissions();
+    } else if (section === 'admin-orders') {
+      admin?.classList.remove('hide');
+      loadAdminOrders();
     }
-    if (section === 'overview') {
-      document.getElementById('distributorCatalog').classList.add('hide');
-    }
-    if (section === 'genealogy') loadMemberGenealogy();
-    if (section === 'commissions') loadMemberCommissions();
-    const target = targets[section];
-    if (target) target.scrollIntoView({behavior:'smooth',block:'start'});
     dashboardNav.querySelectorAll('[data-dash-nav]').forEach(button => {
-      button.classList.toggle('is-active',button.dataset.dashNav === section);
+      const active = button.dataset.dashNav === section;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-current', active ? 'page' : 'false');
     });
   }
   dashboardNav.addEventListener('click', event => {
@@ -391,7 +416,7 @@
     note.textContent = 'Loading official product prices…';
     list.innerHTML = '';
     const {data, error} = await client.from('products')
-      .select('id,name,description,srp,distributor_price,image_path')
+      .select('id,name,description,srp,distributor_price,point_value,image_path')
       .eq('is_active', true)
       .order('name');
     if (error) {
@@ -412,7 +437,7 @@
         <p class="text-sm font-bold">${safe(product.name)}</p>
         <p class="mt-2 text-xs muted">SRP: <span class="line-through">${money(product.srp)}</span></p>
         <p class="mt-1 text-xs uppercase tracking-wider text-emerald-300">Your Distributor price</p>
-        <p class="mt-1 text-2xl font-black text-yellow-300">${money(product.distributor_price)}</p>
+        <p class="mt-1 text-2xl font-black text-yellow-300">${money(product.distributor_price)} <span class="ml-2 inline-flex rounded-full border border-emerald-400/40 px-2 py-1 align-middle text-xs font-bold text-emerald-300">${Number(product.point_value || 0)} PV</span></p>
         ${product.description ? `<p class="mt-2 text-xs muted">${safe(product.description)}</p>` : ''}
         <button type="button" data-add-product="${safe(product.id)}" class="gold mt-4 w-full rounded-lg px-3 py-2 text-sm font-bold">Add to cart</button>
         </div>
