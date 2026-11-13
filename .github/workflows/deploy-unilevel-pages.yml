@@ -27,10 +27,10 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Prepare isolated site
+      - name: Prepare Pages site without removing existing repository content
         run: |
-          mkdir -p _site/unilevel
-          cp -R unilevel/. _site/unilevel/
+          mkdir -p _site
+          rsync -av --exclude='.git' --exclude='_site' ./ _site/
           touch _site/.nojekyll
 
       - name: Upload Pages artifact
